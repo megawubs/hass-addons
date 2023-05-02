@@ -11,7 +11,7 @@ arch:
 ports:
   - 13378/tcp: 13378
 panel_icon: mid:book
-ports_descriptoin:
+ports_description:
   13378/tcp: "Audiobookshelf web interface"
 image: "advplyr/audiobookshelf"
 init: false
