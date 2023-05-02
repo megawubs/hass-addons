@@ -9,7 +9,7 @@ arch:
   - amd64
   - armv7
 ports:
-  - 13378/tcp: 13378
+   13378/tcp: 13378
 panel_icon: mid:book
 ports_description:
   13378/tcp: "Audiobookshelf web interface"
