@@ -1,19 +1,18 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
-name: Audiobookshelf
-version: "0.1"
+name: "Audiobookshelf"
+version: "2.2.19"
 slug: audiobookshelf
-description: Self-hosted audiobook and podcast server
+description: "Self-hosted audiobook and podcast server"
 url: "https://github.com/advplyr/audiobookshelf"
 arch:
-  - armhf
-  - armv7
   - aarch64
   - amd64
-  - i386
-init: false
-map:
-  - share:rw
+  - armv7
 ports:
   - 13378/tcp: 13378
+panel_icon: mid:book
+ports_descriptoin:
+  13378/tcp: "Audiobookshelf web interface"
 image: "advplyr/audiobookshelf"
+init: false
 webui: "http://[HOST]:[PORT:13378]"
