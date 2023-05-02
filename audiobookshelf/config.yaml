@@ -12,7 +12,7 @@ ports:
    80/tcp: 13378
 panel_icon: mid:book
 ports_description:
-  13378/tcp: "Audiobookshelf web interface"
+  80/tcp: "Audiobookshelf web interface"
 image: "advplyr/audiobookshelf"
 init: false
 webui: "https://books.wubsinfo.nl"
