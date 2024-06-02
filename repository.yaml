@@ -1,4 +1,4 @@
 # https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
-name: megawubs/hass-addons
+name: 'megawubs/hass-addons'
 url: 'https://github.com/megawubs/hass-addons'
 maintainer: Bram Wubs <github@wubscloud.nl>
