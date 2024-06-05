@@ -15,4 +15,4 @@ ports_description:
   80/tcp: "Audiobookshelf web interface"
 image: "advplyr/audiobookshelf"
 init: false
-webui: "https://books.wubsinfo.nl"
+webui: "http://[HOST]:[PORT:13378]"
