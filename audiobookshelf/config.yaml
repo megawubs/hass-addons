@@ -17,4 +17,4 @@ image: "advplyr/audiobookshelf"
 init: false
 webui: "http://[HOST]:[PORT:13378]"
 map:
-  - media
+  - media:rw
