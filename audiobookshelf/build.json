@@ -1,0 +1,10 @@
+{
+  "build_from": {
+    "aarch64": "advplyr/audiobookshelf ",
+    "amd64": "advplyr/audiobookshelf",
+    "armv7": "advplyr/audiobookshelf"
+  },
+  "codenotary": {
+    "signer": "github@wubscloud.nl"
+  }
+}
