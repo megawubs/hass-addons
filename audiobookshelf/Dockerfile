@@ -1,3 +1,5 @@
 FROM advplyr/audiobookshelf
 
-VOLUME ["/config", "/metadata"]
+ENV METADATA_PATH "/config/metadata"
+
+VOLUME ["/config"]
