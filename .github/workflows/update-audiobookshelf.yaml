@@ -13,6 +13,10 @@ jobs:
   check-actualbudget-version:
     name: Check Audiobookshelf version
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,8 +27,10 @@ jobs:
           current_version=$(grep -Po '(?<=version: ")[0-9\.]+' audiobookshelf/config.yaml)
           if [[ "$latest_version" != "$current_version" ]]; then
             sed -i "s/version:.*/version: \"$latest_version\"/g" audiobookshelf/config.yaml
-            git config --global user.email "github-actions@github.com"
-            git config --global user.name "Github Actions"
-            git commit -am "Update version to v$latest_version"
-            git push
           fi
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        continue-on-error: true
+        with:
+          commit_message: Bump audiobookshelf version
