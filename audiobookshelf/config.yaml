@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: "Audiobookshelf"
-version: "2.16.2"
+version: "2.17.0"
 slug: audiobookshelf
 description: "Self-hosted audiobook and podcast server"
 url: "https://github.com/advplyr/audiobookshelf"
