@@ -12,6 +12,7 @@ This repository contains the following add-ons
 
 ### [Audiobookshelf](./audiobookshelf)
 ### [storyteller](./storyteller)
+### [openaudible](./openaudible)
 
 
 <!--

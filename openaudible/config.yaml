@@ -5,6 +5,8 @@ slug: openaudible
 description: "OpenAudible is a cross-platform audiobook manager designed for Audible users. Manage/Download all your audiobooks with this easy-to-use desktop application."
 url: "https://openaudible.org/"
 arch:
+  - aarch64
+  - amd64
   - armv7
 ports:
   3000/tcp: 3000
