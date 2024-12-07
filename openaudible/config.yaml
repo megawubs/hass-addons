@@ -14,5 +14,5 @@ ports_description:
   3000/tcp: "OpenAudible webinterface"
 panel_icon: mdi:headphones
 init: false
-image: https://hub.docker.com/r/openaudible/openaudible/tags
+image: openaudible/openaudible
 webui: "http://[HOST]:[PORT:3000]"
