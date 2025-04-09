@@ -1,0 +1,21 @@
+name: Libro.fm Downloader
+description: Download your Libro.fm audiobooks.
+version: "0.4.1"
+slug: librofm_downloader
+startup: once
+boot: manual
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armv7
+options:
+  email: ""
+  password: ""
+schema:
+  email: str
+  password: str
+image: "ghcr.io/burntcookie90/librofm-downloader"
+map:
+  - share:rw
+  - media:rw
