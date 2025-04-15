@@ -62,7 +62,7 @@ ENV \
 WORKDIR /app
 
 # Kopieer het startscript en maak het uitvoerbaar
-COPY scripts/run.sh ./
+COPY run.sh ./
 RUN chmod +x /app/run.sh
 
 # Kopieer de gebouwde applicatie distributie uit de bouwfase

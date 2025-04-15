@@ -42,6 +42,7 @@ export WRITE_TITLE_TAG=$(jq --raw-output '.write_title_tag // env.WRITE_TITLE_TA
 export DEV_MODE=$(jq --raw-output '.dev_mode // env.DEV_MODE' "$CONFIG_PATH")
 export SYNC_INTERVAL=$(jq --raw-output '.sync_interval // env.SYNC_INTERVAL' "$CONFIG_PATH")
 export AUDIO_QUALITY=$(jq --raw-output '.audio_quality // env.AUDIO_QUALITY' "$CONFIG_PATH")
+export DOWNLOAD_DIRECTORY=$(jq --raw-output '.download_directory // env.DOWNLOAD_DIRECTORY' "$CONFIG_PATH")
 
 # --- Configuratie Loggen (Optioneel) ---
 # Wees voorzichtig met het loggen van gevoelige informatie zoals wachtwoorden!
@@ -55,11 +56,12 @@ echo "[INFO] - Write Title Tag: ${WRITE_TITLE_TAG}"
 echo "[INFO] - Dev Mode: ${DEV_MODE}"
 echo "[INFO] - Sync Interval: ${SYNC_INTERVAL}"
 echo "[INFO] - Audio Quality: ${AUDIO_QUALITY}"
+echo "[INFO] - Download Directory: ${AUDIO_QUALITY}"
 
 # --- Applicatie Starten ---
 # Gebruik 'exec' om de shell te vervangen door het server process.
 # Gebruik het correcte pad naar het script dat door 'installDist' is gegenereerd.
 echo "[INFO] Executing server process..."
-exec /app/server/bin/server run "$@"
+exec /app/server/bin/server run --media-dir "$DOWNLOAD_DIRECTORY"  "$@"
 
 # "$@" geeft eventuele argumenten door die aan run.sh zijn meegegeven (normaal geen).
