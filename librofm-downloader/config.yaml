@@ -1,5 +1,5 @@
 name: "Libro.fm Sync"
-version: "0.1.0"
+version: "0.4.1.1-dev"
 slug: "librofm_sync"
 description: "Synchroniseert of verwerkt audioboeken van Libro.fm."
 url: "https://github.com/burntcookie90/librofm-downloader"
