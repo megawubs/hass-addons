@@ -1,21 +1,43 @@
-name: Libro.fm Downloader
-description: Download your Libro.fm audiobooks.
-version: "v0.4.1"
-slug: librofm_downloader
-startup: once
-boot: manual
-init: false
+name: "Libro.fm Sync"
+version: "0.1.0"
+slug: "librofm_sync"
+description: "Synchroniseert of verwerkt audioboeken van Libro.fm."
+url: "https://github.com/burntcookie90/librofm-downloader"
 arch:
-  - aarch64
   - amd64
+  - aarch64
   - armv7
-options:
-  email: ""
-  password: ""
-schema:
-  email: str
-  password: str
-image: "ghcr.io/burntcookie90/librofm-downloader"
+startup: application
+boot: auto
+init: true
+stage: experimental
 map:
   - share:rw
   - media:rw
+options:
+  libro_fm_username: ""
+  libro_fm_password: ""
+  dry_run: false
+  verbose: false
+  format: "M4B"
+  rename_chapters: false
+  write_title_tag: false
+  dev_mode: false
+  sync_interval_hours: 24
+  audio_quality: "128k"
+  download_directory: ""
+schema:
+  libro_fm_username: str
+  libro_fm_password: password
+  dry_run: bool
+  verbose: bool
+  format: list(MP3|M4B)
+  rename_chapters: bool
+  write_title_tag: bool
+  dev_mode: bool
+  sync_interval_hours: int(min=1)
+  audio_quality: list(64k|96k|128k|192k|256k|320k)
+  download_directory: str
+  ingress: true
+  ingress_port: 8080 # De poort waarop je Kotlin app draait BINNEN de container
+  ingress_entry: "/"
