@@ -1,6 +1,6 @@
 name: Libro.fm Downloader
 description: Download your Libro.fm audiobooks.
-version: "0.4.1"
+version: "v0.4.1"
 slug: librofm_downloader
 startup: once
 boot: manual
