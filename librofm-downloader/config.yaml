@@ -1,5 +1,5 @@
 name: "Librofm downloader"
-version: "0.4.1.5"
+version: "0.4.1.6"
 slug: "librofm_sync"
 description: "Automatically audiobooks from Libro.fm"
 url: "https://github.com/burntcookie90/librofm-downloader"
@@ -10,10 +10,6 @@ arch:
 map:
   - share:rw
   - media:rw
-ports:
-  8080/tcp: 8080
-ports_description:
-  8080/tcp: "Librofm downloader web"
 options:
   libro_fm_username: ""
   libro_fm_password: ""
