@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: "Storyteller"
-version: "latest"
+version: "web-v1.4.0-ctc.6"
 slug: storyteller
 description: "Self-hosted platform for creating and reading ebooks with synced narration"
 url: "https://gitlab.com/storyteller-platform/storyteller"
