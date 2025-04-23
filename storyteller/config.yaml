@@ -3,7 +3,7 @@ name: "Storyteller"
 version: "latest"
 slug: storyteller
 description: "Self-hosted platform for creating and reading ebooks with synced narration"
-url: "https://gitlab.com/smoores/storyteller"
+url: "https://gitlab.com/storyteller-platform/storyteller"
 arch:
   - aarch64
   - amd64
@@ -14,5 +14,5 @@ ports_description:
   8001/tcp: "Storyteller web interface"
 panel_icon: mdi:headphones
 init: false
-image: registry.gitlab.com/smoores/storyteller
+image: registry.gitlab.com/storyteller-platform/storyteller
 webui: "http://[HOST]:[PORT:8001]"
