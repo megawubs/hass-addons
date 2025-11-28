@@ -13,7 +13,7 @@ ports_description:
   8083/tcp: "Web interface"
 panel_icon: mdi:book-multiple
 init: false
-image: crocodilestick/calibre-web-automated:latest
+image: crocodilestick/calibre-web-automated
 webui: "http://[HOST]:[PORT:8083]"
 map:
   - media:rw
