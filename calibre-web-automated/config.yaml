@@ -1,5 +1,5 @@
 name: "Calibre-Web Automated"
-version: "V3.1.4-beta-4"
+version: "V3.1.4-beta-5"
 slug: calibre-web-automated
 description: "Modern ebook management with automated processing and conversion"
 url: "https://github.com/crocodilestick/Calibre-Web-Automated"
@@ -9,7 +9,7 @@ arch:
   - armv7
 ports:
   8083/tcp: 8083
-ports_description:
+ports_description
   8083/tcp: "Web interface"
 panel_icon: mdi:book-multiple
 init: false
