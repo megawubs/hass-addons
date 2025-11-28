@@ -15,7 +15,6 @@ ports_description:
   17200/tcp: "HTTP port (for reverse proxy with TLS termination)"
 panel_icon: mdi:book-open-page-variant
 init: false
-image: koreader/kosync
 webui: "https://[HOST]:[PORT:7200]"
 map:
   - share:rw

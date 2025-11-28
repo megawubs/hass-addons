@@ -1,0 +1,1 @@
+FROM crocodilestick/calibre-web-automated
