@@ -1,0 +1,29 @@
+name: "Calibre-Web Automated"
+version: "1.0.0"
+slug: calibre-web-automated
+description: "Modern ebook management with automated processing and conversion"
+url: "https://github.com/crocodilestick/Calibre-Web-Automated"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+ports:
+  8083/tcp: 8083
+ports_description:
+  8083/tcp: "Web interface"
+panel_icon: mdi:book-multiple
+init: false
+image: crocodilestick/calibre-web-automated:latest
+webui: "http://[HOST]:[PORT:8083]"
+map:
+  - media:rw
+  - share:rw
+  - addon_config:rw
+options:
+  timezone: "UTC"
+  network_share_mode: false
+  hardcover_token: ""
+schema:
+  timezone: str
+  network_share_mode: bool
+  hardcover_token: str?
