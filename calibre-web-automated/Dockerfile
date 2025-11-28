@@ -7,9 +7,9 @@ RUN apk add --no-cache jq || true
 RUN mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d && \
     mkdir -p /etc/s6-overlay/s6-rc.d/calibre-library-setup
 
-# Copy init script
-COPY run.sh /etc/s6-overlay/s6-rc.d/calibre-library-setup/run
-RUN chmod a+x /etc/s6-overlay/s6-rc.d/calibre-library-setup/run
+# Copy init script as 'up' (oneshot services use 'up', not 'run')
+COPY run.sh /etc/s6-overlay/s6-rc.d/calibre-library-setup/up
+RUN chmod a+x /etc/s6-overlay/s6-rc.d/calibre-library-setup/up
 
 # Create service type file (oneshot = runs once during init)
 RUN echo "oneshot" > /etc/s6-overlay/s6-rc.d/calibre-library-setup/type
