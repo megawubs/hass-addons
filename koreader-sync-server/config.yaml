@@ -1,0 +1,22 @@
+name: "KOReader Sync Server"
+version: "1.0.0"
+slug: koreader-sync-server
+description: "Self-hosted synchronization service for KOReader devices"
+url: "https://github.com/koreader/koreader-sync-server"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+ports:
+  7200/tcp: 7200
+  17200/tcp: 17200
+ports_description:
+  7200/tcp: "HTTPS port (self-signed certificate)"
+  17200/tcp: "HTTP port (for reverse proxy with TLS termination)"
+panel_icon: mdi:book-open-page-variant
+init: false
+image: koreader/kosync:latest
+webui: "https://[HOST]:[PORT:7200]"
+map:
+  - share:rw
+  - addon_config:rw
