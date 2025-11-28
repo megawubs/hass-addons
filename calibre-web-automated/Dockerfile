@@ -1,8 +1,8 @@
 FROM crocodilestick/calibre-web-automated
 
-# Copy startup script
-COPY run.sh /
-RUN chmod a+x /run.sh
+# Install jq for config parsing (if not already present)
+RUN apk add --no-cache jq || true
 
-# Use custom startup script
-CMD ["/run.sh"]
+# Copy custom init script to run before CWA starts
+COPY run.sh /etc/cont-init.d/99-calibre-library-setup
+RUN chmod a+x /etc/cont-init.d/99-calibre-library-setup
