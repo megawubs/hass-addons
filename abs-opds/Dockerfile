@@ -3,15 +3,15 @@ FROM ghcr.io/vito0912/abs-opds:2.0.4
 # Switch to root to install packages
 USER root
 
-# Install jq for config parsing
+# Install jq and bash for our wrapper script
 RUN apk add --no-cache jq bash
 
-# Copy our custom run script
-COPY run.sh /run.sh
-RUN chmod a+x /run.sh
+# Copy our wrapper script
+COPY run.sh /usr/local/bin/run.sh
+RUN chmod +x /usr/local/bin/run.sh
 
-# Switch back to node user (original user from base image)
+# Switch back to node user
 USER node
 
-# Use our run script as the entry point
-CMD ["run.sh"]
+# Use bash to run our wrapper which sets env vars then calls npm start
+CMD ["/bin/bash", "/usr/local/bin/run.sh"]

@@ -1,4 +1,6 @@
-#!/usr/bin/with-contenv bashset -e
+#!/bin/bash
+
+set -e
 
 # Read config from Home Assistant
 CONFIG_PATH="/data/options.json"
@@ -28,5 +30,8 @@ else
     echo "[abs-opds-init] Warning: No config file found at $CONFIG_PATH"
 fi
 
-# Start the abs-opds server
-exec node dist/index.js
+# Change to the app directory where npm start expects to run
+cd /home/node/app
+
+# Start the abs-opds server using npm start (same as original CMD)
+exec npm start
