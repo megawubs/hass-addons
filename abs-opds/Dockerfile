@@ -10,8 +10,8 @@ RUN apk add --no-cache jq bash
 COPY run.sh /usr/local/bin/run.sh
 RUN chmod a+x /usr/local/bin/run.sh
 
-# Switch back to node user
-USER node
+# Keep running as root for Home Assistant integration
+# (the wrapper script needs to read /data/options.json)
 
 # Use bash to run our wrapper which sets env vars then calls npm start
 CMD ["/bin/bash", "/usr/local/bin/run.sh"]
