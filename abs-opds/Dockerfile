@@ -8,7 +8,7 @@ RUN apk add --no-cache jq bash
 
 # Copy our wrapper script
 COPY run.sh /usr/local/bin/run.sh
-RUN chmod +x /usr/local/bin/run.sh
+RUN chmod a+x /usr/local/bin/run.sh
 
 # Switch back to node user
 USER node
