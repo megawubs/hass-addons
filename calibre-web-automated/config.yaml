@@ -1,5 +1,5 @@
 name: "Calibre-Web Automated"
-version: "V3.1.4-beta-5"
+version: "V3.1.4-beta-6"
 slug: calibre-web-automated
 description: "Modern ebook management with automated processing and conversion"
 url: "https://github.com/crocodilestick/Calibre-Web-Automated"
@@ -22,9 +22,7 @@ options:
   timezone: "UTC"
   network_share_mode: false
   hardcover_token: ""
-  calibre_library_path: "/media/Books/Calibre"
 schema:
   timezone: str
   network_share_mode: bool
   hardcover_token: str?
-  calibre_library_path: str
