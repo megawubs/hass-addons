@@ -1,5 +1,5 @@
 name: "AudiobookShelf OPDS Server"
-version: "2.0.4-beta-1"
+version: "2.0.4-beta-2"
 slug: abs-opds
 description: "OPDS server for AudiobookShelf - access your library from any OPDS-compatible reader"
 url: "https://github.com/Vito0912/abs-opds"

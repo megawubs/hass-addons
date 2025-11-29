@@ -14,4 +14,4 @@ RUN chmod a+x /run.sh
 USER node
 
 # Use our run script as the entry point
-CMD ["/run.sh"]
+CMD ["run.sh"]
