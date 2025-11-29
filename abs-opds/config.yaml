@@ -1,0 +1,32 @@
+name: "AudiobookShelf OPDS Server"
+version: "2.0.4"
+slug: abs-opds
+description: "OPDS server for AudiobookShelf - access your library from any OPDS-compatible reader"
+url: "https://github.com/Vito0912/abs-opds"
+arch:
+  - aarch64
+  - amd64
+ports:
+  3010/tcp: 3010
+ports_description:
+  3010/tcp: "OPDS feed"
+panel_icon: mdi:bookshelf
+init: false
+webui: "http://[HOST]:[PORT:3010]"
+map:
+  - share:rw
+  - addon_config:rw
+options:
+  abs_url: ""
+  show_audiobooks: false
+  show_char_cards: false
+  use_proxy: true
+  opds_page_size: 20
+  opds_users: ""
+schema:
+  abs_url: str
+  show_audiobooks: bool
+  show_char_cards: bool
+  use_proxy: bool
+  opds_page_size: int
+  opds_users: str?
