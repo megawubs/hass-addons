@@ -32,4 +32,4 @@ else
 fi
 
 # Start the bridge
-exec python main.py
+exec python src/main.py
