@@ -1,5 +1,5 @@
 name: "AudiobookShelf KOReader Sync Bridge"
-version: "1.0.0-beta-3"
+version: "1.0.0-beta-4"
 slug: abs-kosync-bridge
 description: "Sync reading progress between AudiobookShelf audiobooks and KOReader ebooks using AI transcription"
 url: "https://github.com/J-Lich/abs-kosync-bridge"

@@ -22,6 +22,20 @@ if [ -f "$CONFIG_PATH" ]; then
     export SYNC_DELTA_KOSYNC_PERCENT=$(jq -r '.sync_delta_kosync_percent // 1' "$CONFIG_PATH")
     export LOG_LEVEL=$(jq -r '.log_level // "INFO"' "$CONFIG_PATH")
 
+    # Save environment variables to a file so they're available when exec'ing into the container
+    cat > /etc/profile.d/addon-env.sh << EOF
+export ABS_SERVER="${ABS_SERVER}"
+export ABS_KEY="${ABS_KEY}"
+export KOSYNC_SERVER="${KOSYNC_SERVER}"
+export KOSYNC_USER="${KOSYNC_USER}"
+export KOSYNC_KEY="${KOSYNC_KEY}"
+export SYNC_PERIOD_MINS="${SYNC_PERIOD_MINS}"
+export FUZZY_MATCH_THRESHOLD="${FUZZY_MATCH_THRESHOLD}"
+export SYNC_DELTA_ABS_SECONDS="${SYNC_DELTA_ABS_SECONDS}"
+export SYNC_DELTA_KOSYNC_PERCENT="${SYNC_DELTA_KOSYNC_PERCENT}"
+export LOG_LEVEL="${LOG_LEVEL}"
+EOF
+
     echo "[abs-kosync-bridge] Configuration loaded successfully"
     echo "[abs-kosync-bridge] ABS_SERVER: ${ABS_SERVER}"
     echo "[abs-kosync-bridge] KOSYNC_SERVER: ${KOSYNC_SERVER}"

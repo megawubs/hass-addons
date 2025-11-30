@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
 COPY run.sh /usr/local/bin/run.sh
 RUN chmod a+x /usr/local/bin/run.sh
 
+RUN echo 'source /etc/profile.d/addon-env.sh 2>/dev/null || true' >> /root/.bashrc
+
 # Keep running as root for Home Assistant integration
 
 # Use bash to run our wrapper which sets env vars then starts the bridge
