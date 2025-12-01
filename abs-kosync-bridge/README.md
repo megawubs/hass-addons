@@ -29,6 +29,8 @@ You need:
 - **kosync_server**: URL to your KOReader Sync Server (default: `http://homeassistant:7200`)
 - **kosync_user**: Your KOReader sync username
 - **kosync_key**: Your KOReader sync password
+- **books_path**: Path where your EPUB files are stored (default: `/media/books`)
+  - Example: `/share/ebooks` or `/media/books`
 
 ### Optional Settings
 
@@ -40,10 +42,21 @@ You need:
 
 ## Usage
 
-1. Configure the addon with your AudiobookShelf and KOReader sync server details
-2. Start the addon
-3. The bridge will automatically sync progress between matching books
-4. Monitor the logs to see sync activity
+1. **Place your ebooks** somewhere accessible to Home Assistant (e.g., `/media/books`, `/share/ebooks`)
+2. **Configure the addon**:
+   - Set `books_path` to where your EPUB files are located
+   - Configure your AudiobookShelf and KOReader sync server details
+3. **Start the addon**
+4. The bridge will automatically sync progress between matching books
+5. Monitor the logs to see sync activity
+
+## Storage and Data Persistence
+
+The addon uses persistent storage to avoid re-downloading and re-transcribing audiobooks:
+
+- **Ebook Library**: Configured via `books_path` option - point it to where your EPUB files are stored
+- **Application Data**: Stored in `/data` - includes transcriptions, cache, and matching data
+- All downloaded audiobooks and transcriptions are automatically persisted
 
 ## Notes
 

@@ -2,8 +2,30 @@
 
 set -e
 
-# Read config from Home Assistant
+# Read config from Home Assistant to get books path
 CONFIG_PATH="/data/options.json"
+BOOKS_PATH=$(jq -r '.books_path // "/media/books"' "$CONFIG_PATH")
+
+# Create necessary directories and symlinks for persistent storage
+echo "[abs-kosync-bridge] Setting up storage directories"
+
+# Ensure the configured books directory exists
+mkdir -p "$BOOKS_PATH"
+
+# Only create symlink if books_path is different from /books
+if [ "$BOOKS_PATH" != "/books" ]; then
+    # Remove /books if it exists (from base image) and create symlink
+    rm -rf /books
+    ln -sf "$BOOKS_PATH" /books
+    echo "[abs-kosync-bridge] Created symlink: /books -> $BOOKS_PATH"
+else
+    echo "[abs-kosync-bridge] Using /books directory directly"
+fi
+
+# /data is automatically mounted by Home Assistant for addon persistent storage
+echo "[abs-kosync-bridge] Storage directories ready"
+echo "[abs-kosync-bridge]   Books: $BOOKS_PATH"
+echo "[abs-kosync-bridge]   Data: /data (app data and cache)"
 
 if [ -f "$CONFIG_PATH" ]; then
     echo "[abs-kosync-bridge] Reading configuration from Home Assistant"
