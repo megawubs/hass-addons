@@ -1,5 +1,5 @@
 name: "Audiobookshelf KOReader Sync Bridge"
-version: "1.0.0-beta-9"
+version: "1.0.0-beta-10"
 slug: abs-kosync-bridge
 description: "Sync reading progress between AudiobookShelf audiobooks and KOReader ebooks using AI transcription"
 url: "https://github.com/J-Lich/abs-kosync-bridge"
@@ -22,7 +22,7 @@ options:
   sync_period_mins: 5
   fuzzy_match_threshold: 80
   sync_delta_abs_seconds: 30
-  sync_delta_kosync_percent: 1
+  sync_delta_kosync_percent: 0.002
   log_level: "INFO"
 schema:
   abs_server: str
@@ -34,5 +34,5 @@ schema:
   sync_period_mins: int
   fuzzy_match_threshold: int
   sync_delta_abs_seconds: int
-  sync_delta_kosync_percent: int
+  sync_delta_kosync_percent: float
   log_level: list(DEBUG|INFO|WARNING|ERROR)
