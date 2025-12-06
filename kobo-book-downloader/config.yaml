@@ -1,5 +1,5 @@
 name: Kobo Book Downloader
-version: "0.12.0-beta-3"
+version: "0.12.0-beta-4"
 slug: kobo-book-downloader
 description: Download Kobo ebooks and audiobooks
 url: https://github.com/subdavis/kobo-book-downloader
@@ -18,9 +18,7 @@ ports_description:
 webui: http://[HOST]:[PORT:5000]
 options:
   download_path: /media/kobo-books
-  format_str: "{Title}"
   log_level: info
 schema:
   download_path: str
-  format_str: str
   log_level: list(debug|info|warning|error)

@@ -26,7 +26,6 @@ This add-on wraps [kobo-book-downloader](https://github.com/subdavis/kobo-book-d
 
 ```yaml
 download_path: /media/kobo-books
-format_str: "{Title}"
 log_level: info
 ```
 
@@ -35,23 +34,6 @@ log_level: info
 The directory where downloaded books will be saved. This path should be within the `/media` directory to ensure persistence and accessibility.
 
 Default: `/media/kobo-books`
-
-### Option: `format_str`
-
-The naming pattern for downloaded files. You can use metadata fields from your books to customize the filename.
-
-Available fields:
-- `{Title}` - Book title
-- `{Author}` - Author name
-- `{Series}` - Series name
-- `{SeriesNumber}` - Series number
-
-Examples:
-- `{Title}` (default) - e.g., "The Great Gatsby.epub"
-- `{Author}/{Title}` - e.g., "F. Scott Fitzgerald/The Great Gatsby.epub"
-- `{Series}/{SeriesNumber} - {Title}` - e.g., "Harry Potter/1 - Harry Potter and the Philosopher's Stone.epub"
-
-Default: `{Title}`
 
 ### Option: `log_level`
 
