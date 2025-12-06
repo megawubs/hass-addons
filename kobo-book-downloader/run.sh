@@ -22,4 +22,4 @@ export KOBODL_CONFIG_DIR="/addon_config"
 # Start the kobodl web server
 echo "[kobo-book-downloader] Starting web interface on port 5000..."
 cd /app || exit 1
-exec kobodl serve --host 0.0.0.0 --port 5000 --output-dir "$DOWNLOAD_PATH" --format-str "$FORMAT_STR"
+exec kobodl --config /addon_config/kobodl.json serve --host 0.0.0.0 --port 5000 --output-dir "$DOWNLOAD_PATH" --format-str "$FORMAT_STR"

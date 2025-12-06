@@ -7,5 +7,6 @@ RUN apk add --no-cache bash jq
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
-# Use bash to run the script
+# Override the entrypoint and use bash to run the script
+ENTRYPOINT []
 CMD ["/bin/bash", "/run.sh"]
