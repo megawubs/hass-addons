@@ -24,4 +24,3 @@ schema:
   download_path: str
   format_str: str
   log_level: list(debug|info|warning|error)
-image: ghcr.io/megawubs/hass-addons/kobo-book-downloader
