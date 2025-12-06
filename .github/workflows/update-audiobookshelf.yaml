@@ -24,9 +24,9 @@ jobs:
       - name: Get latest release tag and update YAML file
         run: |
           latest_version=$(curl -s https://api.github.com/repos/advplyr/audiobookshelf/tags | jq -r '.[0].name' | cut -d 'v' -f 2)
-          current_version=$(grep -Po '(?<=version: ")[0-9\.]+' audiobookshelf/config.yaml)
+          current_version=$(grep -Po '(?<=version: ")[^"]+' audiobookshelf/config.yaml)
           if [[ "$latest_version" != "$current_version" ]]; then
-            sed -i "s/version:.*/version: \"$latest_version\"/g" audiobookshelf/config.yaml
+            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" audiobookshelf/config.yaml
           fi
 
       - name: Commit changes

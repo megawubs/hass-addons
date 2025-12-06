@@ -23,10 +23,10 @@ jobs:
 
       - name: Get latest release tag and update YAML file
         run: |
-          latest_version=$(curl -s https://api.github.com/repos/koreader/koreader-sync-server/tags | jq -r '.[0].name' | cut -d 'v' -f 2)
-          current_version=$(grep -Po '(?<=version: ")[0-9\.]+' koreader-sync-server/config.yaml)
+          latest_version=$(curl -s https://api.github.com/repos/koreader/koreader-sync-server/tags | jq -r '.[0].name')
+          current_version=$(grep -Po '(?<=version: ")[^"]+' koreader-sync-server/config.yaml)
           if [[ "$latest_version" != "$current_version" ]]; then
-            sed -i "s/version:.*/version: \"$latest_version\"/g" koreader-sync-server/config.yaml
+            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" koreader-sync-server/config.yaml
           fi
 
       - name: Commit changes

@@ -23,10 +23,10 @@ jobs:
 
       - name: Get latest release tag and update YAML file
         run: |
-          latest_version=$(curl -s https://api.github.com/repos/crocodilestick/Calibre-Web-Automated/releases/latest | jq -r '.tag_name' | cut -d 'v' -f 2)
-          current_version=$(grep -Po '(?<=version: ")[0-9\.]+' calibre-web-automated/config.yaml)
+          latest_version=$(curl -s https://api.github.com/repos/crocodilestick/Calibre-Web-Automated/releases/latest | jq -r '.tag_name')
+          current_version=$(grep -Po '(?<=version: ")[^"]+' calibre-web-automated/config.yaml)
           if [[ "$latest_version" != "$current_version" ]] && [[ "$latest_version" != "null" ]] && [[ -n "$latest_version" ]]; then
-            sed -i "s/version:.*/version: \"$latest_version\"/g" calibre-web-automated/config.yaml
+            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" calibre-web-automated/config.yaml
           fi
 
       - name: Commit changes
