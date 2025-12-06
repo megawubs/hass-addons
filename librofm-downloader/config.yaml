@@ -1,7 +1,7 @@
 name: "Librofm downloader"
-version: "0.4.1.6"
+version: "0.4.1.6-beta-1"
 slug: "librofm_sync"
-description: "Automatically audiobooks from Libro.fm"
+description: "Automatically downloads audiobooks from Libro.fm"
 url: "https://github.com/burntcookie90/librofm-downloader"
 arch:
   - amd64
