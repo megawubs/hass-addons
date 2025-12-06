@@ -17,7 +17,7 @@ mkdir -p "$DOWNLOAD_PATH"
 
 # Export environment variables for kobodl
 export KOBODL_OUTPUT_DIR="$DOWNLOAD_PATH"
-export KOBODL_CONFIG_DIR="/config"
+export KOBODL_CONFIG_DIR="/addon_config"
 
 # Start the kobodl web server
 echo "[kobo-book-downloader] Starting web interface on port 5000..."
