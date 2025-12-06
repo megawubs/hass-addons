@@ -1,5 +1,5 @@
 name: "Librofm downloader"
-version: "0.4.1.6-beta-1"
+version: "0.4.1.7"
 slug: "librofm_sync"
 description: "Automatically downloads audiobooks from Libro.fm"
 url: "https://github.com/burntcookie90/librofm-downloader"
@@ -7,30 +7,38 @@ arch:
   - amd64
   - aarch64
   - armv7
+ports:
+  8080/tcp: 8080
+webui: "http://[HOST]:[PORT:8080]"
 map:
   - share:rw
   - media:rw
+  - addon_config:rw
 options:
   libro_fm_username: ""
   libro_fm_password: ""
-  dry_run: false
-  verbose: false
-  format: "M4B"
+  format: "M4B_MP3_FALLBACK"
+  sync_interval: "d"
   rename_chapters: false
   write_title_tag: false
-  dev_mode: false
-  sync_interval_hours: 24
-  audio_quality: "128k"
-  download_directory: ""
+  parallel_count: 1
+  log_level: "INFO"
+  path_pattern: "FIRST_AUTHOR/BOOK_TITLE"
+  hardcover_token: ""
+  hardcover_sync_mode: "LIBRO_OWNED_TO_HARDCOVER"
+  skip_tracking_isbns: ""
+  healthcheck_id: ""
 schema:
   libro_fm_username: str
   libro_fm_password: password
-  dry_run: bool
-  verbose: bool
-  format: list(MP3|M4B)
+  format: list(MP3|M4B_MP3_FALLBACK|M4B_CONVERT_FALLBACK)
+  sync_interval: list(h|d|w)
   rename_chapters: bool
   write_title_tag: bool
-  dev_mode: bool
-  sync_interval_hours: int(min=1)
-  audio_quality: list(64k|96k|128k|192k|256k|320k)
-  download_directory: str
+  parallel_count: int(1,10)
+  log_level: list(NONE|INFO|VERBOSE)
+  path_pattern: str
+  hardcover_token: str?
+  hardcover_sync_mode: list(LIBRO_WISHLISTS_TO_HARDCOVER|LIBRO_OWNED_TO_HARDCOVER|LIBRO_ALL_TO_HARDCOVER|HARDCOVER_WANT_TO_READ_TO_LIBRO|ALL)?
+  skip_tracking_isbns: str?
+  healthcheck_id: str?
