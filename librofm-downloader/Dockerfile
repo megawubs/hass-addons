@@ -8,4 +8,5 @@ RUN apk add --no-cache bash jq
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
-CMD ["/run.sh"]
+# Use bash to run the script (tini is the entrypoint from base image)
+CMD ["/bin/bash", "/run.sh"]
