@@ -1,0 +1,31 @@
+name: Kobo Book Downloader
+version: "0.12.0"
+slug: kobo-book-downloader
+description: Download Kobo ebooks and audiobooks
+url: https://github.com/subdavis/kobo-book-downloader
+arch:
+  - aarch64
+  - amd64
+  - armv7
+  - armhf
+  - i386
+init: false
+map:
+  - config:rw
+  - media:rw
+  - share:rw
+  - addon_config:rw
+ports:
+  5000/tcp: 5000
+ports_description:
+  5000/tcp: Web UI
+webui: http://[HOST]:[PORT:5000]
+options:
+  download_path: /media/kobo-books
+  format_str: "{Title}"
+  log_level: info
+schema:
+  download_path: str
+  format_str: str
+  log_level: list(debug|info|warning|error)
+image: ghcr.io/megawubs/hass-addons/kobo-book-downloader
