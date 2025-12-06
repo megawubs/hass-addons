@@ -6,9 +6,6 @@ url: https://github.com/subdavis/kobo-book-downloader
 arch:
   - aarch64
   - amd64
-  - armv7
-  - armhf
-  - i386
 init: false
 map:
   - config:rw
