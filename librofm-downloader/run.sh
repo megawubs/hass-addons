@@ -1,10 +1,10 @@
-#!/usr/bin/with-contenv bashio
+#!/bin/bash
 
 # Read configuration from Home Assistant
 CONFIG_PATH="/data/options.json"
 
 if [ -f "$CONFIG_PATH" ]; then
-    bashio::log.info "Reading configuration from Home Assistant"
+    echo "[librofm-downloader] Reading configuration from Home Assistant"
 
     # Get configuration values
     LIBRO_FM_USERNAME=$(jq -r '.libro_fm_username // ""' "$CONFIG_PATH")
@@ -50,27 +50,23 @@ if [ -f "$CONFIG_PATH" ]; then
         export HEALTHCHECK_ID
     fi
 
-    # The app expects /data for persistent storage
-    # Create symlink: /data -> /config (Home Assistant addon persistent storage)
-    if [ ! -L /data ]; then
-        rm -rf /data
-        ln -sf /config /data
-    fi
+    # Note: /data is already mounted by Home Assistant to /config
+    # The app uses /data for persistent storage, which is perfect
 
     # /media is already mounted by Home Assistant
     # The app hardcodes /media and uses PATH_PATTERN to organize subdirectories
 
     # Log configuration (without password)
-    bashio::log.info "Configuration loaded successfully"
-    bashio::log.info "Format: ${FORMAT}"
-    bashio::log.info "Sync Interval: ${SYNC_INTERVAL}"
-    bashio::log.info "Path Pattern: ${PATH_PATTERN}"
-    bashio::log.info "Books will download to: /media/${PATH_PATTERN}"
+    echo "[librofm-downloader] Configuration loaded successfully"
+    echo "[librofm-downloader] Format: ${FORMAT}"
+    echo "[librofm-downloader] Sync Interval: ${SYNC_INTERVAL}"
+    echo "[librofm-downloader] Path Pattern: ${PATH_PATTERN}"
+    echo "[librofm-downloader] Books will download to: /media/${PATH_PATTERN}"
 else
-    bashio::log.warning "No config file found at $CONFIG_PATH"
+    echo "[librofm-downloader] Warning: No config file found at $CONFIG_PATH"
 fi
 
 # Change to app directory and run the application
 cd /app || exit 1
-bashio::log.info "Starting Libro.fm downloader..."
+echo "[librofm-downloader] Starting Libro.fm downloader..."
 exec bin/app
