@@ -50,19 +50,22 @@ if [ -f "$CONFIG_PATH" ]; then
         export HEALTHCHECK_ID
     fi
 
-    # Set data directory to addon config for persistence
-    export DATA_DIR="/config"
+    # The app expects /data for persistent storage
+    # Create symlink: /data -> /config (Home Assistant addon persistent storage)
+    if [ ! -L /data ]; then
+        rm -rf /data
+        ln -sf /config /data
+    fi
 
-    # Set media directory for audiobook downloads
-    export MEDIA_DIR="/media"
+    # /media is already mounted by Home Assistant
+    # The app hardcodes /media and uses PATH_PATTERN to organize subdirectories
 
     # Log configuration (without password)
     bashio::log.info "Configuration loaded successfully"
     bashio::log.info "Format: ${FORMAT}"
     bashio::log.info "Sync Interval: ${SYNC_INTERVAL}"
-    bashio::log.info "Media Directory: ${MEDIA_DIR}"
-    bashio::log.info "Data Directory: ${DATA_DIR}"
     bashio::log.info "Path Pattern: ${PATH_PATTERN}"
+    bashio::log.info "Books will download to: /media/${PATH_PATTERN}"
 else
     bashio::log.warning "No config file found at $CONFIG_PATH"
 fi
