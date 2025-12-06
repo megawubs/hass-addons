@@ -1,0 +1,36 @@
+name: Update Librofm Downloader
+on:
+  schedule:
+    # Once a day.
+    - cron: '0 0 * * *'
+  # allow manual trigger
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-librofm-version:
+    name: Check Librofm Downloader version
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest release tag and update YAML file
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/burntcookie90/librofm-downloader/tags | jq -r '.[0].name' | cut -d 'v' -f 2)
+          current_version=$(grep -Po '(?<=version: ")[^"]+' librofm-downloader/config.yaml)
+          if [[ "$latest_version" != "$current_version" ]]; then
+            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" librofm-downloader/config.yaml
+          fi
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        continue-on-error: true
+        with:
+          commit_message: Bump librofm-downloader version
