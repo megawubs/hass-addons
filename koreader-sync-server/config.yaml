@@ -1,5 +1,5 @@
 name: "KOReader Sync Server"
-version: "v2.0-beta-1"
+version: "v2.0"
 slug: koreader-sync-server
 description: "Self-hosted synchronization service for KOReader devices"
 url: "https://github.com/koreader/koreader-sync-server"
