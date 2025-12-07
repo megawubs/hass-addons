@@ -1,5 +1,5 @@
 name: "Librofm downloader"
-version: "2.1.2-beta-1"
+version: "2.1.2"
 slug: "librofm_sync"
 description: "Tool to sync down your libro.fm library "
 url: "https://github.com/burntcookie90/librofm-downloader"
