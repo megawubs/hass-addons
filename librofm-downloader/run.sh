@@ -20,6 +20,7 @@ if [ -f "$CONFIG_PATH" ]; then
     HARDCOVER_SYNC_MODE=$(jq -r '.hardcover_sync_mode // "LIBRO_OWNED_TO_HARDCOVER"' "$CONFIG_PATH")
     SKIP_TRACKING_ISBNS=$(jq -r '.skip_tracking_isbns // ""' "$CONFIG_PATH")
     HEALTHCHECK_ID=$(jq -r '.healthcheck_id // ""' "$CONFIG_PATH")
+    BOOKS_PATH=$(jq -r '.books_path // "/media"' "$CONFIG_PATH")
 
     # Export required environment variables
     export LIBRO_FM_USERNAME
@@ -34,6 +35,8 @@ if [ -f "$CONFIG_PATH" ]; then
     export RENAME_CHAPTERS
     export WRITE_TITLE_TAG
 
+    echo "[librofm-dowloader] Storage directories ready"
+    echo "[librofm-dowloader]   Books: $BOOKS_PATH"
     # Export optional Hardcover integration if token provided
     if [ -n "$HARDCOVER_TOKEN" ]; then
         export HARDCOVER_TOKEN
@@ -53,9 +56,6 @@ if [ -f "$CONFIG_PATH" ]; then
     # Note: /data is already mounted by Home Assistant to /config
     # The app uses /data for persistent storage, which is perfect
 
-    # /media is already mounted by Home Assistant
-    # The app hardcodes /media and uses PATH_PATTERN to organize subdirectories
-
     # Log configuration (without password)
     echo "[librofm-downloader] Configuration loaded successfully"
     echo "[librofm-downloader] Format: ${FORMAT}"
@@ -69,4 +69,5 @@ fi
 # Change to app directory and run the application
 cd /app || exit 1
 echo "[librofm-downloader] Starting Libro.fm downloader..."
-exec bin/app
+
+exec bin/app --media-dir="$BOOKS_PATH"

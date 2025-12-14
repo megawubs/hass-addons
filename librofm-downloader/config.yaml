@@ -28,6 +28,7 @@ options:
   hardcover_sync_mode: "LIBRO_OWNED_TO_HARDCOVER"
   skip_tracking_isbns: ""
   healthcheck_id: ""
+  books_path: "/media/books"
 schema:
   libro_fm_username: str
   libro_fm_password: password
@@ -42,3 +43,4 @@ schema:
   hardcover_sync_mode: list(LIBRO_WISHLISTS_TO_HARDCOVER|LIBRO_OWNED_TO_HARDCOVER|LIBRO_ALL_TO_HARDCOVER|HARDCOVER_WANT_TO_READ_TO_LIBRO|ALL)?
   skip_tracking_isbns: str?
   healthcheck_id: str?
+  books_path: str?
