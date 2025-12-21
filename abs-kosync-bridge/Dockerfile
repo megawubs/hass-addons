@@ -1,4 +1,4 @@
-FROM megawubs/abs-kosync-bridge:latest
+FROM 00jlich/abs-kosync-bridge:latest
 
 # Switch to root to install packages
 USER root
