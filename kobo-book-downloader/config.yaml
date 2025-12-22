@@ -1,5 +1,5 @@
 name: Kobo Book Downloader
-version: "v0.6.0-beta-1"
+version: "v0.6.0"
 slug: kobo-book-downloader
 description: Download Kobo ebooks and audiobooks
 url: https://github.com/subdavis/kobo-book-downloader
