@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.50] - 2026-01-15
+
+### Fixed
+- Playwright MCP CDP endpoint hostname corrected to `playwright-browser` (was `local-playwright-browser`)
+- Fixes "ENOTFOUND local-playwright-browser" connection error
+
 ## [1.2.49] - 2026-01-15
 
 ### Added
