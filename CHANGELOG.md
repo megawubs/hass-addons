@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.63] - 2026-02-23
+
+### Changed
+- Playwright Browser add-on: added aarch64 (ARM64) architecture support
+
 ## [1.2.62] - 2026-01-26
 
 ### Fixed
