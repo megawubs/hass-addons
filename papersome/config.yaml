@@ -6,7 +6,7 @@ url: "https://github.com/thijskuilman/papersome"
 arch:
   - aarch64
   - amd64
-image: "ghcr.io/megawubs/hass-addons/papersome"
+image: "ghcr.io/megawubs/hass-addons/papersome-{arch}"
 init: false
 privileged:
   - SYS_ADMIN
