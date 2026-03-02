@@ -2,15 +2,7 @@
 FROM alpine/git AS source
 RUN git clone --depth=1 https://github.com/thijskuilman/papersome /app
 
-# Stage 2: Build frontend assets
-FROM node:20-alpine AS frontend
-WORKDIR /app
-COPY --from=source /app/package*.json ./
-RUN npm ci
-COPY --from=source /app .
-RUN npm run build
-
-# Stage 3: Install Composer dependencies
+# Stage 2: Install Composer dependencies (needed by frontend build for Filament CSS)
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY --from=source /app/composer.json /app/composer.lock ./
@@ -21,6 +13,15 @@ RUN composer install \
     --ignore-platform-reqs
 COPY --from=source /app .
 RUN composer dump-autoload --optimize --no-scripts 2>/dev/null || true
+
+# Stage 3: Build frontend assets (requires vendor/ for Filament theme CSS resolution)
+FROM node:20-alpine AS frontend
+WORKDIR /app
+COPY --from=source /app/package*.json ./
+RUN npm ci
+COPY --from=source /app .
+COPY --from=vendor /app/vendor /app/vendor
+RUN npm run build
 
 # Stage 4: Final image
 FROM serversideup/php:8.4-frankenphp
