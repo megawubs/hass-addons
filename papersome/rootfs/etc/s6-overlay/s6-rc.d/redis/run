@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+mkdir -p /addon_config/redis
+
+echo "[redis] Starting redis-server..."
+exec redis-server \
+    --dir /addon_config/redis \
+    --bind 127.0.0.1 \
+    --save 60 1 \
+    --appendonly no

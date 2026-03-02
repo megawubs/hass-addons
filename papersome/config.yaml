@@ -1,0 +1,27 @@
+name: "Papersome"
+version: "main"
+slug: papersome
+description: "Transform RSS/Atom feeds into ePub newspapers and magazines"
+url: "https://github.com/thijskuilman/papersome"
+arch:
+  - aarch64
+  - amd64
+init: false
+privileged:
+  - SYS_ADMIN
+ports:
+  8088/tcp: 8088
+ports_description:
+  8088/tcp: "Papersome web interface"
+webui: "http://[HOST]:[PORT:8088]"
+panel_icon: mdi:newspaper
+map:
+  - media:rw
+  - share:rw
+  - addon_config:rw
+options:
+  app_url: ""
+  db_password: "papersome"
+schema:
+  app_url: str?
+  db_password: password
