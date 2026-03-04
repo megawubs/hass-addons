@@ -11,9 +11,9 @@ init: false
 privileged:
   - SYS_ADMIN
 ports:
-  8088/tcp: 8088
+  8080/tcp: 8088
 ports_description:
-  8088/tcp: "Papersome web interface"
+  8080/tcp: "Papersome web interface"
 webui: "http://[HOST]:[PORT:8088]"
 panel_icon: mdi:newspaper
 map:

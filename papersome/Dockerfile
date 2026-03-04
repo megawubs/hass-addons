@@ -73,5 +73,4 @@ ENV APP_ENV=production \
     AUTORUN_LARAVEL_MIGRATION=false \
     PHP_UPLOAD_MAX_FILE_SIZE=500M \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-    BROWSERSHOT_CHROMIUM_PATH=/usr/bin/chromium \
-    SERVER_NAME=:8088
+    BROWSERSHOT_CHROMIUM_PATH=/usr/bin/chromium
