@@ -69,7 +69,8 @@ REDIS_CLIENT=phpredis
 
 QUEUE_CONNECTION=redis
 
-LOG_CHANNEL=stderr
+LOG_CHANNEL=stack
+LOG_STACK=stderr,daily
 LOG_LEVEL=debug
 
 PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
