@@ -23,6 +23,8 @@ map:
 options:
   app_url: ""
   db_password: "papersome"
+  app_debug: false
 schema:
   app_url: str?
   db_password: password
+  app_debug: bool

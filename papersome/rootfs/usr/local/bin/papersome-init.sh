@@ -6,6 +6,7 @@ echo "[papersome-init] Starting initialization..."
 # Read configuration from Home Assistant
 APP_URL_OPTION=$(jq -r '.app_url // ""' /data/options.json)
 DB_PASSWORD=$(jq -r '.db_password // "papersome"' /data/options.json)
+APP_DEBUG=$(jq -r '.app_debug // false' /data/options.json)
 
 # Ensure addon_config directories exist
 mkdir -p /addon_config/mariadb /addon_config/redis /addon_config/storage
@@ -51,7 +52,7 @@ cat > /var/www/html/.env <<EOF
 APP_NAME=Papersome
 APP_ENV=production
 APP_KEY=${APP_KEY}
-APP_DEBUG=false
+APP_DEBUG=${APP_DEBUG}
 APP_URL=${APP_URL}
 
 DB_CONNECTION=mysql
