@@ -109,8 +109,9 @@ chown -R www-data:www-data /addon_config/storage 2>/dev/null || true
 cd /var/www/html
 php artisan storage:link --force 2>/dev/null || true
 
-# Clear config cache so .env changes are picked up
-php artisan config:clear 2>/dev/null || true
+# Optimize now that .env is written with correct values
+php artisan optimize:clear 2>/dev/null || true
+php artisan optimize 2>/dev/null || true
 
 # Run database migrations
 echo "[papersome-init] Running database migrations..."
