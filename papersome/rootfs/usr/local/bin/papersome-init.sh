@@ -105,17 +105,16 @@ rm -rf /var/www/html/storage
 ln -sf /addon_config/storage /var/www/html/storage
 chown -R www-data:www-data /addon_config/storage 2>/dev/null || true
 
-# Create public storage link
+# Run the base image's autorun logic now that .env is written and DB is ready
+echo "[papersome-init] Running Laravel automations..."
 cd /var/www/html
-php artisan storage:link --force 2>/dev/null || true
-
-# Optimize now that .env is written with correct values
-php artisan optimize:clear 2>/dev/null || true
-php artisan optimize 2>/dev/null || true
-
-# Run database migrations
-echo "[papersome-init] Running database migrations..."
-php artisan migrate --force --no-interaction
-echo "[papersome-init] Migrations complete"
+AUTORUN_ENABLED=true \
+AUTORUN_LARAVEL_STORAGE_LINK=true \
+AUTORUN_LARAVEL_MIGRATION=true \
+AUTORUN_LARAVEL_MIGRATION_FORCE=true \
+AUTORUN_LARAVEL_MIGRATION_SKIP_DB_CHECK=true \
+AUTORUN_LARAVEL_OPTIMIZE=true \
+/etc/entrypoint.d/50-laravel-automations.sh
+echo "[papersome-init] Laravel automations complete"
 
 echo "[papersome-init] Initialization complete"
