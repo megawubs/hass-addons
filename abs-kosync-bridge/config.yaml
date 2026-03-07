@@ -1,5 +1,5 @@
 name: "Audiobookshelf KOReader Sync Bridge"
-version: "1.0"
+version: "1.1"
 slug: abs-kosync-bridge
 description: "Sync reading progress between AudiobookShelf, KOReader, Storyteller and Booklore"
 url: "https://github.com/cporcellijr/abs-kosync-bridge"
@@ -18,10 +18,8 @@ map:
   - addon_config:rw
   - media:rw
 options:
-  books_path: "/media/books"
   log_level: "INFO"
   tz: "UTC"
 schema:
-  books_path: str
   log_level: list(DEBUG|INFO|WARNING|ERROR)
   tz: str
