@@ -54,7 +54,7 @@ Available options:
 
 ## Notes
 
-- Your Kobo credentials are stored in `/addon_config/kobo-book-downloader/kobodl.json`
+- Your Kobo credentials are stored in `/addon_config/kobodl.json` (persists across restarts)
 - Downloaded books are saved in their original DRM-free format
 - The web interface runs on port 5000
 
