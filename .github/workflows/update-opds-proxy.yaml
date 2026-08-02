@@ -1,4 +1,4 @@
-name: Trigger rebuild from external branch
+name: Update OPDS Proxy
 on:
   schedule:
     # Once a day.
@@ -23,12 +23,44 @@ jobs:
 
       - name: Get latest release tag and update YAML file
         run: |
-          latest_version=$(curl -s https://api.github.com/repos/evan-buss/opds-proxy/tags | jq -r '.[0].name' | cut -d 'v' -f 2)
+          set -euo pipefail
+
+          # Pick the highest semver tag rather than trusting the order the API
+          # happens to return, and drop the "v" that the git tags carry but the
+          # published image tags do not.
+          latest_version=$(curl -sfL \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/evan-buss/opds-proxy/tags?per_page=100" \
+            | jq -r '.[].name' \
+            | sed 's/^v//' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -V \
+            | tail -1 || true)
+
           current_version=$(grep -Po '(?<=version: ")[^"]+' opds-proxy/config.yaml)
-          if [[ "$latest_version" != "$current_version" ]]; then
-            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" opds-proxy/config.yaml
-            sed -i "s/^ARG OPDS_PROXY_VERSION=.*/ARG OPDS_PROXY_VERSION=$latest_version/g" opds-proxy/Dockerfile
+
+          if [[ -z "${latest_version}" ]]; then
+            echo "Could not determine the latest version, keeping ${current_version}."
+            exit 0
           fi
+
+          if [[ "${latest_version}" == "${current_version}" ]]; then
+            echo "Already on ${current_version}."
+            exit 0
+          fi
+
+          # The add-on builds FROM the upstream image, so a git tag alone is not
+          # enough: bumping before the image is published would break the build
+          # on every installation.
+          if ! docker manifest inspect \
+              "ghcr.io/evan-buss/opds-proxy:${latest_version}" > /dev/null 2>&1; then
+            echo "Tag ${latest_version} has no published image yet, skipping."
+            exit 0
+          fi
+
+          echo "Bumping ${current_version} -> ${latest_version}"
+          sed -i "s/version: \".*\"/version: \"${latest_version}\"/" opds-proxy/config.yaml
+          sed -i "s/^ARG OPDS_PROXY_VERSION=.*/ARG OPDS_PROXY_VERSION=${latest_version}/" opds-proxy/Dockerfile
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
