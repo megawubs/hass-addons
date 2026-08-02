@@ -1,0 +1,37 @@
+name: Trigger rebuild from external branch
+on:
+  schedule:
+    # Once a day.
+    - cron: '0 0 * * *'
+  # allow manual trigger
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-opds-proxy-version:
+    name: Check OPDS Proxy version
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest release tag and update YAML file
+        run: |
+          latest_version=$(curl -s https://api.github.com/repos/evan-buss/opds-proxy/tags | jq -r '.[0].name' | cut -d 'v' -f 2)
+          current_version=$(grep -Po '(?<=version: ")[^"]+' opds-proxy/config.yaml)
+          if [[ "$latest_version" != "$current_version" ]]; then
+            sed -i "s/version: \".*\"/version: \"$latest_version\"/g" opds-proxy/config.yaml
+            sed -i "s/^ARG OPDS_PROXY_VERSION=.*/ARG OPDS_PROXY_VERSION=$latest_version/g" opds-proxy/Dockerfile
+          fi
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        continue-on-error: true
+        with:
+          commit_message: Bump opds-proxy version

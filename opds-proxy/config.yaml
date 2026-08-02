@@ -1,0 +1,37 @@
+# https://developers.home-assistant.io/docs/apps/configuration
+name: "OPDS Proxy"
+version: "0.3.3"
+slug: opds-proxy
+description: "Browse and download from your OPDS libraries on any eReader"
+url: "https://github.com/evan-buss/opds-proxy"
+arch:
+  - aarch64
+  - amd64
+init: false
+ports:
+  8080/tcp: 8080
+ports_description:
+  8080/tcp: "Web interface, open this one on your eReader"
+webui: "http://[HOST]:[PORT:8080]"
+watchdog: "http://[HOST]:[PORT:8080]/"
+panel_icon: mdi:book-arrow-down
+map:
+  # Lets you drop your own config.yml here to bypass the options below.
+  - type: addon_config
+    read_only: false
+backup_exclude:
+  # Scratch space for books that are being converted.
+  - "tmp/*"
+options:
+  log_level: info
+  feeds:
+    - name: "Audiobookshelf"
+      url: "http://e419b1cb-abs-opds:3010"
+schema:
+  log_level: list(trace|debug|info|notice|warning|error|fatal)
+  feeds:
+    - name: str
+      url: str
+      username: str?
+      password: password?
+      local_only: bool?

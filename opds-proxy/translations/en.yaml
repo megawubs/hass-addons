@@ -1,0 +1,34 @@
+configuration:
+  log_level:
+    name: Log level
+    description: >-
+      How much detail to write to the add-on log. "debug" and "trace" also log
+      every request opds-proxy makes to your feeds.
+  feeds:
+    name: OPDS feeds
+    description: >-
+      The catalogs shown on the home page. At least one feed is required.
+    fields:
+      name:
+        name: Name
+        description: Label shown on the home page.
+      url:
+        name: Feed URL
+        description: >-
+          Full URL of the OPDS feed, including http:// or https://. To reach
+          another add-on, use its internal hostname and internal port, for
+          example http://e419b1cb-abs-opds:3010.
+      username:
+        name: Username
+        description: >-
+          Username for feeds behind HTTP basic authentication. Leave empty to
+          be prompted in the browser instead.
+      password:
+        name: Password
+        description: Password that goes with the username above.
+      local_only:
+        name: Only use these credentials locally
+        description: >-
+          Send the stored username and password only for requests coming from
+          your local network. Requests from outside get the login form instead.
+          Recommended when this add-on is reachable from the internet.
