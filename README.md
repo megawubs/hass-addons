@@ -13,6 +13,7 @@ This repository contains the following add-ons
 ### [Audiobookshelf](./audiobookshelf)
 ### [storyteller](./storyteller)
 ### [openaudible](./openaudible)
+### [OPDS Proxy](./opds-proxy)
 
 
 <!--

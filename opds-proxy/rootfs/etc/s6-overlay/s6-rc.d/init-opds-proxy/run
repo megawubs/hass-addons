@@ -1,0 +1,96 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Render the add-on options into an opds-proxy configuration file.
+# ==============================================================================
+declare -r OPTIONS="/data/options.json"
+declare -r RUNTIME_CONFIG="/data/config.yml"
+declare -r KEYS_FILE="/data/auth_keys.json"
+declare -r USER_CONFIG="/config/config.yml"
+declare -r TMP_DIR="/data/tmp"
+declare -r PORT="8080"
+
+declare log_level
+log_level=$(jq -r '.log_level // "info"' "${OPTIONS}")
+bashio::log.level "${log_level}"
+
+# opds-proxy downloads and converts books into "tmp/", relative to its working
+# directory. It cleans up after itself, but a crash mid-download can leave a
+# stale file behind, so start from an empty directory every time.
+rm -rf "${TMP_DIR}"
+mkdir -p "${TMP_DIR}"
+
+# Without fixed keys opds-proxy generates new ones on every boot, which logs
+# everyone out of their feeds whenever the add-on restarts.
+if ! bashio::fs.file_exists "${KEYS_FILE}"; then
+    bashio::log.info "Generating cookie signing keys..."
+    jq -n \
+        --arg hash_key "$(openssl rand -hex 32)" \
+        --arg block_key "$(openssl rand -hex 32)" \
+        '{hash_key: $hash_key, block_key: $block_key}' > "${KEYS_FILE}"
+    chmod 600 "${KEYS_FILE}"
+fi
+
+# Escape hatch for feed setups that the add-on options cannot express.
+if bashio::fs.file_exists "${USER_CONFIG}"; then
+    bashio::log.notice "Found ${USER_CONFIG}, using it instead of the add-on options."
+    cp "${USER_CONFIG}" "${RUNTIME_CONFIG}"
+    exit 0
+fi
+
+if [[ "$(jq '(.feeds // []) | length' "${OPTIONS}")" -eq 0 ]]; then
+    bashio::exit.nok \
+        "No feeds configured. Add at least one OPDS feed in the add-on configuration."
+fi
+
+declare incomplete
+incomplete=$(jq -r '
+    [ (.feeds // [])
+      | to_entries[]
+      | select((.value.name // "") == "" or (.value.url // "") == "")
+      | "#\(.key + 1)"
+    ] | join(", ")
+' "${OPTIONS}")
+if bashio::var.has_value "${incomplete}"; then
+    bashio::exit.nok \
+        "Every feed needs both a name and a url, but these are incomplete: ${incomplete}"
+fi
+
+while read -r url; do
+    bashio::log.warning \
+        "Feed url '${url}' has no http:// or https:// prefix, opds-proxy will not be able to reach it."
+done < <(jq -r '(.feeds // [])[] | select((.url | test("^https?://")) | not) | .url' "${OPTIONS}")
+
+# opds-proxy only knows "debug on/off", so fold the finer log levels into it.
+declare debug="false"
+if [[ "${log_level}" =~ ^(trace|debug)$ ]]; then
+    debug="true"
+fi
+
+# JSON is a subset of YAML, so emitting compact JSON here is both valid input
+# for opds-proxy's YAML parser and immune to quoting mistakes in passwords.
+jq -c \
+    --slurpfile keys "${KEYS_FILE}" \
+    --arg port "${PORT}" \
+    --argjson debug "${debug}" \
+    '{
+        port: $port,
+        debug: $debug,
+        auth: {
+            hash_key: $keys[0].hash_key,
+            block_key: $keys[0].block_key
+        },
+        feeds: [
+            (.feeds // [])[]
+            | { name: .name, url: .url }
+              + (if (.username // "") != "" then {
+                    auth: {
+                        username: .username,
+                        password: (.password // ""),
+                        local_only: (.local_only // false)
+                    }
+                } else {} end)
+        ]
+    }' "${OPTIONS}" > "${RUNTIME_CONFIG}"
+chmod 600 "${RUNTIME_CONFIG}"
+
+bashio::log.info "Configured $(jq '.feeds | length' "${RUNTIME_CONFIG}") feed(s)."

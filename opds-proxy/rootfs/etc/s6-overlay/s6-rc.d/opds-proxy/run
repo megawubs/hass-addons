@@ -1,0 +1,11 @@
+#!/command/with-contenv bashio
+# ==============================================================================
+# Run the OPDS Proxy server.
+# ==============================================================================
+bashio::log.info "Starting OPDS Proxy..."
+
+# opds-proxy resolves its scratch directory relative to the working directory,
+# so it has to be started from /data (see init-opds-proxy).
+cd /data || bashio::exit.nok "Could not change directory to /data"
+
+exec opds-proxy --config /data/config.yml
