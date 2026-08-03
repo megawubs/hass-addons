@@ -1,4 +1,12 @@
-FROM ghcr.io/vito0912/abs-opds:2.0.4
+# Temporarily built from megawubs/abs-opds instead of upstream, to test the
+# OPDS Content-Type fix on branch fix/opds-content-type before offering it to
+# Vito0912/abs-opds as a pull request. Revert to
+# `FROM ghcr.io/vito0912/abs-opds:2.0.4` once that is merged and released.
+#
+# Pinned by digest rather than the mutable :dev tag, so a rebuild cannot
+# silently reuse a stale cached image and make the fix look broken.
+# Digest of :dev at megawubs/abs-opds 571b953.
+FROM ghcr.io/megawubs/abs-opds@sha256:6181ef170fb3fa4a1c9449310e6904724ae1b6123150831b09ac9abb3868d4b1
 
 # Switch to root to install packages
 USER root
