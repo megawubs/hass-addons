@@ -27,6 +27,11 @@ RUN chmod a+x /usr/bin/opds-proxy /usr/bin/kepubify \
     && find /etc/s6-overlay/s6-rc.d -type f \( -name run -o -name up -o -name finish \) \
         -exec chmod a+x {} +
 
+# Replaces the config.yaml `watchdog` option, which the add-on linter rejects
+# in favour of a native health check. curl comes from the base image.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -fsS -o /dev/null http://127.0.0.1:8080/ || exit 1
+
 LABEL \
     io.hass.name="OPDS Proxy" \
     io.hass.description="Browse and download from your OPDS libraries on any eReader" \
