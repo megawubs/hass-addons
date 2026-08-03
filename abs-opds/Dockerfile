@@ -1,7 +1,8 @@
 # Temporarily built from megawubs/abs-opds instead of upstream, to test the
 # OPDS Content-Type fix on branch fix/opds-content-type before offering it to
-# Vito0912/abs-opds as a pull request. Revert to
-# `FROM ghcr.io/vito0912/abs-opds:2.0.4` once that is merged and released.
+# Vito0912/abs-opds as a pull request. To revert once that is merged and
+# released: restore `FROM ghcr.io/vito0912/abs-opds:2.0.4` here and set the
+# version in config.yaml back to 2.0.4-beta-5.
 #
 # Pinned by digest rather than the mutable :dev tag, so a rebuild cannot
 # silently reuse a stale cached image and make the fix look broken.
