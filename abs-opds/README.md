@@ -6,7 +6,7 @@ This Home Assistant addon provides an OPDS server for AudiobookShelf, allowing y
 
 This addon wraps the [abs-opds](https://github.com/Vito0912/abs-opds) project by Vito0912, which creates an OPDS feed from your AudiobookShelf library.
 
-> **Temporarily running from a fork.** Version `2.0.4-ctfix-1` builds from
+> **Temporarily running from a fork.** Version `2.0.4-beta-6` builds from
 > [megawubs/abs-opds](https://github.com/megawubs/abs-opds/tree/fix/opds-content-type)
 > rather than upstream. Upstream serves every OPDS feed as `application/xml`
 > instead of the `application/atom+xml` media type OPDS 1.2 requires, which
