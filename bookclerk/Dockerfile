@@ -8,6 +8,11 @@
 #   1. Get a new SHA from https://github.com/fritz-fritz/bookclerk/commits/main
 #   2. Update BOOKCLERK_REF below
 #   3. Bump `version:` in config.yaml (that's what triggers a Supervisor/CI rebuild)
+#      — ALWAYS increment the leading X.Y.Z, don't just swap the trailing
+#      commit-SHA suffix. Home Assistant compares versions as strings once it
+#      hits the non-numeric suffix, so e.g. "0.1.1-0bb16ea" can sort *lower*
+#      than "0.1.1-73b5462" (plain '0' < '7') and the Supervisor silently
+#      won't offer the update at all.
 #
 # TEMPORARY: pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration
 # branch (PR https://github.com/fritz-fritz/bookclerk/pull/96, still draft) to
