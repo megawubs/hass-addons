@@ -14,6 +14,7 @@ This repository contains the following add-ons
 ### [storyteller](./storyteller)
 ### [openaudible](./openaudible)
 ### [OPDS Proxy](./opds-proxy)
+### [Bookclerk](./bookclerk)
 
 
 <!--
