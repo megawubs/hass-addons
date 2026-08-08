@@ -1,5 +1,5 @@
 name: "Bookclerk"
-version: "0.1.0+60263a4"
+version: "0.1.0-60263a4"
 slug: bookclerk
 description: "Multi-storefront audiobook library manager (Audible, Libro.fm, Chirp, GraphicAudio) with a web UI"
 url: "https://github.com/fritz-fritz/bookclerk"
