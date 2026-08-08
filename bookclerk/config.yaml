@@ -4,7 +4,6 @@ slug: bookclerk
 description: "Multi-storefront audiobook library manager (Audible, Libro.fm, Chirp, GraphicAudio) with a web UI"
 url: "https://github.com/fritz-fritz/bookclerk"
 arch:
-  - aarch64
   - amd64
 image: "ghcr.io/megawubs/hass-addons/bookclerk-{arch}"
 init: false

@@ -48,7 +48,7 @@ Eight of the ten add-ons follow the same recipe to adapt an upstream image to Ho
 
 - **Directory mappings** (`map:` in `config.yaml`): add-ons request `media:rw`, `share:rw`, and `addon_config:rw` as needed. Note the persistent-config path is **inconsistent** between add-ons: some `run.sh` scripts write to `/config`, others to `/addon_config` — verify the actual mount before trusting a path (this has caused real bugs).
 - **Web UI**: exposed via the `ports:` + `webui:` keys. Each add-on uses a different host port.
-- **Architectures** (`arch:`): all support `aarch64` + `amd64`; `audiobookshelf`, `calibre-web-automated`, `koreader-sync-server`, `librofm-downloader`, and `storyteller` additionally list `armv7`. The CI build matrix iterates `aarch64/amd64/armhf/armv7/i386` but filters by each add-on's `arch` list.
+- **Architectures** (`arch:`): most support `aarch64` + `amd64`; `audiobookshelf`, `calibre-web-automated`, `koreader-sync-server`, `librofm-downloader`, and `storyteller` additionally list `armv7`. `bookclerk` is `amd64`-only (its Rust workspace's `--release` build is slow enough on its own without paying the QEMU-emulation tax `aarch64` adds on top). The CI build matrix iterates `aarch64/amd64/armhf/armv7/i386` but filters by each add-on's `arch` list.
 
 ## Versioning & the update workflows
 
