@@ -8,12 +8,20 @@
 #   1. Get a new SHA from https://github.com/fritz-fritz/bookclerk/commits/main
 #   2. Update BOOKCLERK_REF below
 #   3. Bump `version:` in config.yaml (that's what triggers a Supervisor/CI rebuild)
+#
+# TEMPORARY: pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration
+# branch (PR https://github.com/fritz-fritz/bookclerk/pull/96, still draft) to
+# verify the GraphicAudio domain-migration fix against real accounts before
+# marking that PR ready for review. Revert BOOKCLERK_REPO/BOOKCLERK_REF to
+# upstream once verified (merged, or fix confirmed not to work).
 
-ARG BOOKCLERK_REF=60263a4ded3b7db934cdef6fb6406e5cc8c937c7
+ARG BOOKCLERK_REPO=https://github.com/megawubs/bookclerk
+ARG BOOKCLERK_REF=73b546213bf92a989a39e23d3316470e999a2b88
 
 FROM alpine/git AS source
+ARG BOOKCLERK_REPO
 ARG BOOKCLERK_REF
-RUN git clone https://github.com/fritz-fritz/bookclerk /app \
+RUN git clone "$BOOKCLERK_REPO" /app \
     && cd /app \
     && git checkout "$BOOKCLERK_REF"
 
