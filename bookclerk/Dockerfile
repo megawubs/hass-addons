@@ -11,12 +11,13 @@
 #
 # TEMPORARY: pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration
 # branch (PR https://github.com/fritz-fritz/bookclerk/pull/96, still draft) to
-# verify the GraphicAudio domain-migration fix against real accounts before
-# marking that PR ready for review. Revert BOOKCLERK_REPO/BOOKCLERK_REF to
-# upstream once verified (merged, or fix confirmed not to work).
+# verify the GraphicAudio domain-migration fix + the account_id sqlite guest
+# plugin fix against real accounts before marking that PR ready for review.
+# Revert BOOKCLERK_REPO/BOOKCLERK_REF to upstream once verified (merged, or
+# fix confirmed not to work).
 
 ARG BOOKCLERK_REPO=https://github.com/megawubs/bookclerk
-ARG BOOKCLERK_REF=73b546213bf92a989a39e23d3316470e999a2b88
+ARG BOOKCLERK_REF=0bb16ea793c5265e15876ec4fc93284512427a78
 
 FROM alpine/git AS source
 ARG BOOKCLERK_REPO
