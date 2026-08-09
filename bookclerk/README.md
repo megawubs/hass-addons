@@ -79,6 +79,23 @@ Open a terminal into the add-on and run:
 cat /data/operator.token
 ```
 
+### Checking your accounts as operator
+
+The web UI's "Accounts" page is a **portal** (multi-user linking) feature —
+signed in as operator, it will always show an empty list or a "requires a
+portal session" error, even when your storefront accounts are configured and
+working correctly. This is expected, not a bug. To check account status,
+use the CLI instead:
+
+```
+docker ps --format '{{.Names}}' | grep bookclerk   # find the container name — app_<repo-hash>_bookclerk
+docker exec -e BOOKCLERK_AUTH_PASSWORD='<your auth_password option>' \
+  <container name from above> bookclerk auth list
+```
+
+(`docker exec` doesn't inherit `run.sh`'s exported environment, so
+`BOOKCLERK_AUTH_PASSWORD` has to be passed explicitly.)
+
 ## First run
 
 `/data/config.toml` is generated once on first start (sources enabled based
