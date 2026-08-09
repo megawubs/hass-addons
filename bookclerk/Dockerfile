@@ -27,7 +27,7 @@
 # back to upstream and BOOKCLERK_REF to the merge commit once PR #96 lands.
 
 ARG BOOKCLERK_REPO=https://github.com/megawubs/bookclerk
-ARG BOOKCLERK_REF=c56a70ed548123f1eb2d2a3562cc8d466caa15c4
+ARG BOOKCLERK_REF=4fd16f5f09359f87cd42956f03041ce44ba1e990
 
 FROM alpine/git AS source
 ARG BOOKCLERK_REPO
