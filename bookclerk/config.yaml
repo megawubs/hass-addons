@@ -1,5 +1,5 @@
 name: "Bookclerk"
-version: "0.1.3-0bb16ea"
+version: "0.1.4-0bb16ea"
 slug: bookclerk
 description: "Multi-storefront audiobook library manager (Audible, Libro.fm, Chirp, GraphicAudio) with a web UI"
 url: "https://github.com/fritz-fritz/bookclerk"
@@ -26,6 +26,8 @@ options:
   libro_fm_accounts: []
   chirp_accounts: []
   audible_marketplaces: []
+  audiobookshelf_host: ""
+  audiobookshelf_api_key: ""
 schema:
   auth_password: password
   auto_acquire: bool
@@ -43,3 +45,5 @@ schema:
     - email: str
       password: password
   audible_marketplaces: ["str"]
+  audiobookshelf_host: str?
+  audiobookshelf_api_key: password?

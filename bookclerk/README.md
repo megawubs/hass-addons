@@ -54,6 +54,15 @@ and log in automatically on every start.
 - **graphicaudio_access**: `web` (default), `zip`, or `device` — see
   bookclerk's own [`docs/sources.md`](https://github.com/fritz-fritz/bookclerk/blob/main/docs/sources.md)
   for the tradeoffs.
+- **audiobookshelf_host** / **audiobookshelf_api_key**: optional. Point these
+  at an existing Audiobookshelf instance (e.g. the `audiobookshelf` add-on in
+  this same repository — its internal address is typically
+  `http://audiobookshelf:13378`) to enable bookclerk's Audiobookshelf
+  integration: notifying ABS to rescan on new acquisitions, optional listening
+  sync, and optional user watch. Leave `audiobookshelf_host` empty to skip
+  this entirely — it's off by default. An API key is required for the
+  integration to do anything; generate one in Audiobookshelf under
+  Settings → Users.
 
 ## Web UI and the operator token
 

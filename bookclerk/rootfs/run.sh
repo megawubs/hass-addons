@@ -16,6 +16,8 @@ OUTPUT_PATH=$(jq -r '.output_path // "Audiobooks"' "$CONFIG_PATH")
 LOG_LEVEL=$(jq -r '.log_level // "info"' "$CONFIG_PATH")
 PLUGIN_ISOLATION=$(jq -r '.plugin_isolation // "best-effort"' "$CONFIG_PATH")
 GA_ACCESS=$(jq -r '.graphicaudio_access // "web"' "$CONFIG_PATH")
+ABS_HOST=$(jq -r '.audiobookshelf_host // ""' "$CONFIG_PATH")
+ABS_API_KEY=$(jq -r '.audiobookshelf_api_key // ""' "$CONFIG_PATH")
 
 if [ -z "$AUTH_PASSWORD" ]; then
     echo "[bookclerk] ERROR: the 'auth_password' option is required — it protects the operator API (bound to 0.0.0.0 here) and encrypts stored source credentials at rest."
@@ -29,6 +31,19 @@ export RUST_LOG="$LOG_LEVEL"
 export BOOKCLERK_GA_ACCESS="$GA_ACCESS"
 export BOOKCLERK_PLUGIN_ISOLATION="$PLUGIN_ISOLATION"
 export BOOKCLERK_MEDIA_ISOLATION="$PLUGIN_ISOLATION"
+
+# Audiobookshelf integration: opt-in, enabled only when a host is set.
+# Passed as env (BOOKCLERK_ABS_*), never written to config.toml, matching
+# how every other credential here is handled.
+if [ -n "$ABS_HOST" ]; then
+    export BOOKCLERK_ABS_ENABLED="true"
+    export BOOKCLERK_ABS_BASE_URL="$ABS_HOST"
+    if [ -n "$ABS_API_KEY" ]; then
+        export BOOKCLERK_ABS_API_KEY="$ABS_API_KEY"
+    else
+        echo "[bookclerk] WARNING: audiobookshelf_host is set but audiobookshelf_api_key is empty — the integration requires an API key to do anything"
+    fi
+fi
 
 mkdir -p "$BOOKCLERK_OUTPUT_LOCAL_ROOT"
 
