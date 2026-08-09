@@ -32,6 +32,15 @@ export BOOKCLERK_GA_ACCESS="$GA_ACCESS"
 export BOOKCLERK_PLUGIN_ISOLATION="$PLUGIN_ISOLATION"
 export BOOKCLERK_MEDIA_ISOLATION="$PLUGIN_ISOLATION"
 
+# Disabled: bookclerk's ONNX embedder (on by default) downloads/loads a MiniLM
+# model synchronously inside the async /api/discover/recommendations handler
+# (the Discover tab is the default post-login view) with no spawn_blocking and
+# no visible timeout. Reproduced this hanging the entire daemon indefinitely —
+# confirmed via an orphaned huggingface-hub .lock file next to a fully
+# downloaded model blob. Falls back to a lightweight local-hash embedder
+# instead, which is synchronous but cheap enough not to need offloading.
+export BOOKCLERK_DISCOVERY_EMBEDDINGS_ENABLED="false"
+
 # Audiobookshelf integration: opt-in, enabled only when a host is set.
 # Passed as env (BOOKCLERK_ABS_*), never written to config.toml, matching
 # how every other credential here is handled.

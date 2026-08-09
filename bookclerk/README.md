@@ -111,6 +111,15 @@ the add-on never overwrites an existing `config.toml`.
   `cargo stage-plugins` tooling. This is newer, less-traveled code than the
   wrapped add-ons in this repo — check the add-on log carefully on first
   install.
+- ML-based recommendation embeddings are disabled
+  (`BOOKCLERK_DISCOVERY_EMBEDDINGS_ENABLED=false`). bookclerk's ONNX embedder
+  downloads/loads a MiniLM model synchronously inside the `/api/discover/
+  recommendations` handler (the Discover tab is the default post-login view)
+  with no `spawn_blocking` and no visible timeout — reproduced this hanging
+  the entire daemon indefinitely, confirmed via an orphaned
+  huggingface-hub `.lock` file left next to a fully-downloaded model blob.
+  Recommendations still work via a lightweight local-hash embedder instead
+  of the ONNX one.
 
 ## Support
 
