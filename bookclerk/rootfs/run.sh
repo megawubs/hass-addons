@@ -25,7 +25,13 @@ if [ -z "$AUTH_PASSWORD" ]; then
 fi
 
 export BOOKCLERK_AUTH_PASSWORD="$AUTH_PASSWORD"
-export BOOKCLERK_OUTPUT_LOCAL_ROOT="/media/${OUTPUT_PATH}"
+# output_path may already be an absolute /media/... path (e.g. copy-pasted
+# from the media share browser) — don't double-prefix it in that case.
+if [[ "$OUTPUT_PATH" = /* ]]; then
+    export BOOKCLERK_OUTPUT_LOCAL_ROOT="$OUTPUT_PATH"
+else
+    export BOOKCLERK_OUTPUT_LOCAL_ROOT="/media/${OUTPUT_PATH}"
+fi
 export BOOKCLERK_LOG="$LOG_LEVEL"
 export RUST_LOG="$LOG_LEVEL"
 export BOOKCLERK_GA_ACCESS="$GA_ACCESS"
