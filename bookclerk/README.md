@@ -56,12 +56,17 @@ and log in automatically on every start.
   for the tradeoffs.
 - **audiobookshelf_host** / **audiobookshelf_api_key**: optional. Point these
   at an existing Audiobookshelf instance (e.g. the `audiobookshelf` add-on in
-  this same repository — its internal address is typically
-  `http://audiobookshelf:13378`) to enable bookclerk's Audiobookshelf
-  integration: notifying ABS to rescan on new acquisitions, optional listening
-  sync, and optional user watch. Leave `audiobookshelf_host` empty to skip
-  this entirely — it's off by default. An API key is required for the
-  integration to do anything; generate one in Audiobookshelf under
+  this same repository) to enable bookclerk's Audiobookshelf integration:
+  notifying ABS to rescan on new acquisitions, optional listening sync, and
+  optional user watch. The add-on's own container hostname (e.g.
+  `app_<repo-hash>_audiobookshelf`) is not predictable across installs and
+  its bare slug (`audiobookshelf`) does not resolve — use
+  `http://homeassistant:13378` instead (Home Assistant's own hostname
+  routes through the Supervisor's Docker network gateway to any add-on's
+  published host port; substitute Audiobookshelf's actual port if you
+  changed it). Leave `audiobookshelf_host` empty to skip this entirely —
+  it's off by default. An API key is required for the integration to do
+  anything; generate one in Audiobookshelf under
   Settings → Users.
 
 ## Web UI and the operator token
