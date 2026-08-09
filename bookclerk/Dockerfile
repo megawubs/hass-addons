@@ -14,12 +14,13 @@
 #      than "0.1.1-73b5462" (plain '0' < '7') and the Supervisor silently
 #      won't offer the update at all.
 #
-# TEMPORARY: pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration
-# branch (PR https://github.com/fritz-fritz/bookclerk/pull/96, still draft) to
-# verify the GraphicAudio domain-migration fix + the account_id sqlite guest
-# plugin fix against real accounts before marking that PR ready for review.
-# Revert BOOKCLERK_REPO/BOOKCLERK_REF to upstream once verified (merged, or
-# fix confirmed not to work).
+# Pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration branch
+# (upstream PR https://github.com/fritz-fritz/bookclerk/pull/96) instead of
+# upstream main: fixes GraphicAudio login (domain migration) and a sqlite
+# guest-plugin bug that silently corrupted account_id on every new account
+# login, regardless of source. Both fixes verified end-to-end against real
+# accounts. Switch BOOKCLERK_REPO back to upstream and BOOKCLERK_REF to the
+# merge commit once PR #96 lands.
 
 ARG BOOKCLERK_REPO=https://github.com/megawubs/bookclerk
 ARG BOOKCLERK_REF=0bb16ea793c5265e15876ec4fc93284512427a78
