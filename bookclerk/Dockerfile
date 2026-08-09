@@ -16,14 +16,18 @@
 #
 # Pinned to megawubs/bookclerk's fix/graphicaudio-domain-migration branch
 # (upstream PR https://github.com/fritz-fritz/bookclerk/pull/96) instead of
-# upstream main: fixes GraphicAudio login (domain migration) and a sqlite
+# upstream main: fixes GraphicAudio login (domain migration), a sqlite
 # guest-plugin bug that silently corrupted account_id on every new account
-# login, regardless of source. Both fixes verified end-to-end against real
-# accounts. Switch BOOKCLERK_REPO back to upstream and BOOKCLERK_REF to the
-# merge commit once PR #96 lands.
+# login (regardless of source), and a GraphicAudio Access App client_id bug
+# that would otherwise burn through the account's 4-device-slot limit on
+# every add-on restart if access="device" is ever enabled. First two fixes
+# verified end-to-end against real accounts; the client_id fix is unit/
+# integration-tested only — deliberately not yet exercised against a real
+# access="device" login (scarce device-slot budget). Switch BOOKCLERK_REPO
+# back to upstream and BOOKCLERK_REF to the merge commit once PR #96 lands.
 
 ARG BOOKCLERK_REPO=https://github.com/megawubs/bookclerk
-ARG BOOKCLERK_REF=0bb16ea793c5265e15876ec4fc93284512427a78
+ARG BOOKCLERK_REF=c56a70ed548123f1eb2d2a3562cc8d466caa15c4
 
 FROM alpine/git AS source
 ARG BOOKCLERK_REPO
