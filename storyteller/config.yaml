@@ -1,22 +1,30 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: "Storyteller"
-version: "web-v1.4.0-ctc.6"
+version: "web-v2.14.20"
 slug: storyteller
 description: "Self-hosted platform for creating and reading ebooks with synced narration"
 url: "https://gitlab.com/storyteller-platform/storyteller"
 arch:
+  # Upstream only publishes amd64 and arm64 images; there has never been an
+  # armv7 build to pull.
   - aarch64
   - amd64
-  - armv7
 ports:
   8001/tcp: 8001
 ports_description:
   8001/tcp: "Storyteller web interface"
 panel_icon: mdi:headphones
 init: false
-image: registry.gitlab.com/storyteller-platform/storyteller
 webui: "http://[HOST]:[PORT:8001]"
 map:
   - media:rw
   - share:rw
   - addon_config:rw
+options:
+  log_level: info
+  enable_web_reader: false
+schema:
+  log_level: list(error|warn|info|debug|trace)
+  enable_web_reader: bool
+  secret_key: password?
+  auth_url: str?
