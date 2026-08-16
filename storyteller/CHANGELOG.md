@@ -1,10 +1,11 @@
 # Changelog
 
-## web-v2.14.20
+## 2.14.20
 
-Updates [Storyteller][upstream] from `web-v1.4.0-ctc.6` to `web-v2.14.20`. The
-old pin was an experimental build off a side branch, not a release, and nothing
-was tracking it — see `DOCS.md` for what to do before updating.
+Updates [Storyteller][upstream] to upstream's `web-v2.14.20`, from
+`web-v1.4.0-ctc.6`. The old pin was an experimental build off a side branch, not
+a release, and nothing was tracking it — see `DOCS.md` for what to do before
+updating.
 
 - Adds a daily workflow that follows upstream's `web-vX.Y.Z` releases, so this
   cannot silently fall behind again.
@@ -18,5 +19,8 @@ was tracking it — see `DOCS.md` for what to do before updating.
   what makes the options above possible.
 - Dropped `armv7` from the supported architectures: upstream has never published
   an image for it.
+- The add-on version is plain semver rather than upstream's `web-vX.Y.Z` tag,
+  which Home Assistant parses as an unknown version and cannot compare. The
+  upstream tag is pinned in the Dockerfile instead.
 
 [upstream]: https://gitlab.com/storyteller-platform/storyteller

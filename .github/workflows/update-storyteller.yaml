@@ -44,16 +44,19 @@ jobs:
             | sort -V \
             | tail -1 || true)
 
-          current_version=$(grep -Po '(?<=version: ")[^"]+' storyteller/config.yaml)
+          current_version=$(grep -Po '^version: "\K[^"]+' storyteller/config.yaml)
 
           if [[ -z "${latest_version}" ]]; then
             echo "Could not determine the latest version, keeping ${current_version}."
             exit 0
           fi
 
+          # The add-on version is the bare number, because Home Assistant has to
+          # be able to parse it; the `web-v` prefix only exists upstream, so it
+          # stays in the Dockerfile.
           latest_tag="web-v${latest_version}"
 
-          if [[ "${latest_tag}" == "${current_version}" ]]; then
+          if [[ "${latest_version}" == "${current_version}" ]]; then
             echo "Already on ${current_version}."
             exit 0
           fi
@@ -74,8 +77,8 @@ jobs:
             exit 0
           fi
 
-          echo "Bumping ${current_version} -> ${latest_tag}"
-          sed -i "s/version: \".*\"/version: \"${latest_tag}\"/" storyteller/config.yaml
+          echo "Bumping ${current_version} -> ${latest_version}"
+          sed -i "s/^version: \".*\"/version: \"${latest_version}\"/" storyteller/config.yaml
           sed -i "s/^ARG STORYTELLER_VERSION=.*/ARG STORYTELLER_VERSION=${latest_tag}/" storyteller/Dockerfile
 
       - name: Commit changes

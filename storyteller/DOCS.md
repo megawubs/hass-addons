@@ -64,9 +64,11 @@ will run the server fine, but expect alignment to be slow. Only `amd64` and
 
 ## Upgrading from `web-v1.4.0-ctc.6`
 
-Versions of this add-on before `web-v2.14.20` pinned `web-v1.4.0-ctc.6`, an
-experimental build off a side branch that predates the 2.x line. The jump is
-large, so:
+Versions of this add-on before 2.14.20 pinned `web-v1.4.0-ctc.6`, an
+experimental build off a side branch that predates the 2.x line. The add-on's
+own version is plain semver from now on — Home Assistant cannot parse or compare
+version strings that are not bare numbers — while the upstream tag it
+corresponds to is pinned in the Dockerfile. The jump is large, so:
 
 - **Take a backup of the add-on before you update.** Storyteller migrates its
   database on startup, and there is no way back down.
