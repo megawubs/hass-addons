@@ -1,0 +1,25 @@
+configuration:
+  log_level:
+    name: Log level
+    description: >-
+      How much detail Storyteller writes to the add-on log. Raise it to "debug"
+      when an alignment fails and you want to know why.
+  enable_web_reader:
+    name: Web reader
+    description: >-
+      Read and listen to your books in the browser instead of only in the mobile
+      apps. Upstream still labels this experimental.
+  secret_key:
+    name: Secret key
+    description: >-
+      Signs the login tokens for your instance. Leave this empty and the add-on
+      generates a random key on first start and reuses it from then on. Only
+      fill it in to reuse the key from an existing Storyteller instance, for
+      example when moving over from Docker Compose. Changing it signs everyone
+      out.
+  auth_url:
+    name: External URL
+    description: >-
+      The full URL your instance is reached at, for example
+      https://storyteller.example.com. Only required when you sign in through an
+      OAuth or OIDC provider; leave empty otherwise.

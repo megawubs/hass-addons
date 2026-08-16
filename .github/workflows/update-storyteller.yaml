@@ -1,0 +1,85 @@
+name: Update Storyteller
+on:
+  schedule:
+    # Once a day.
+    - cron: '0 0 * * *'
+  # allow manual trigger
+  workflow_dispatch:
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-storyteller-version:
+    name: Check Storyteller version
+    runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get latest release tag and update YAML file
+        run: |
+          set -euo pipefail
+
+          project="storyteller-platform%2Fstoryteller"
+          image="storyteller-platform/storyteller"
+
+          # Storyteller is a monorepo: it tags every component it ships
+          # (mobile-, align-, tauri-, okmain-, nodekit-) and every pre-release
+          # line (-alpha, -beta, and one-off experiments such as -ctc) in the
+          # same repository. Only a plain `web-vX.Y.Z` tag is a server release,
+          # so match that shape exactly -- following anything else is how this
+          # add-on ended up pinned to an experimental build for years.
+          # `order_by=version` sorts the pre-releases above the stable tags, so
+          # pick the highest ourselves rather than taking the first result.
+          latest_version=$(curl -sfL \
+            "https://gitlab.com/api/v4/projects/${project}/repository/tags?search=web-v&order_by=version&sort=desc&per_page=100" \
+            | jq -r '.[].name' \
+            | grep -E '^web-v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sed 's/^web-v//' \
+            | sort -V \
+            | tail -1 || true)
+
+          current_version=$(grep -Po '(?<=version: ")[^"]+' storyteller/config.yaml)
+
+          if [[ -z "${latest_version}" ]]; then
+            echo "Could not determine the latest version, keeping ${current_version}."
+            exit 0
+          fi
+
+          latest_tag="web-v${latest_version}"
+
+          if [[ "${latest_tag}" == "${current_version}" ]]; then
+            echo "Already on ${current_version}."
+            exit 0
+          fi
+
+          # The add-on builds FROM the upstream image, so a git tag alone is not
+          # enough: bumping before the image is published would break the build
+          # on every installation. The registry is public, but its API still
+          # wants a token, so fetch an anonymous pull token first.
+          token=$(curl -sfL \
+            "https://gitlab.com/jwt/auth?service=container_registry&scope=repository:${image}:pull" \
+            | jq -r '.token')
+
+          if ! curl -sfL -o /dev/null \
+              -H "Authorization: Bearer ${token}" \
+              -H "Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json" \
+              "https://registry.gitlab.com/v2/${image}/manifests/${latest_tag}"; then
+            echo "Tag ${latest_tag} has no published image yet, skipping."
+            exit 0
+          fi
+
+          echo "Bumping ${current_version} -> ${latest_tag}"
+          sed -i "s/version: \".*\"/version: \"${latest_tag}\"/" storyteller/config.yaml
+          sed -i "s/^ARG STORYTELLER_VERSION=.*/ARG STORYTELLER_VERSION=${latest_tag}/" storyteller/Dockerfile
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        continue-on-error: true
+        with:
+          commit_message: Bump storyteller version
