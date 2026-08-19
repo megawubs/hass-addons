@@ -4,7 +4,7 @@ name: "Storyteller"
 # AwesomeVersion, and anything that is not a bare version string (the old
 # "web-v1.4.0-ctc.6" included) parses as UNKNOWN and cannot be compared. The
 # upstream tag that goes with this lives in the Dockerfile.
-version: "2.14.20"
+version: "2.14.21"
 slug: storyteller
 description: "Self-hosted platform for creating and reading ebooks with synced narration"
 url: "https://gitlab.com/storyteller-platform/storyteller"

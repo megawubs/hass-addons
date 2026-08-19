@@ -7,7 +7,7 @@
 # There is deliberately no `image:` key in config.yaml, so the Supervisor builds
 # this on the user's device and the CI builder skips it. That is cheap: every
 # expensive layer already lives in the upstream image.
-ARG STORYTELLER_VERSION=web-v2.14.20
+ARG STORYTELLER_VERSION=web-v2.14.21
 FROM registry.gitlab.com/storyteller-platform/storyteller:${STORYTELLER_VERSION}
 
 # The upstream image is Ubuntu based (see upstream's Dockerfile.base), so apt,
