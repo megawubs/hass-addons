@@ -57,6 +57,24 @@ configuration:
       Prefix for auto-generated Remote Control session names visible in claude.ai/code
       and the Claude mobile app. Defaults to "HomeAssistant", producing names like
       "HomeAssistant-graceful-unicorn". Only applies when Enable Remote Control is on.
+  remote_control_server:
+    name: Remote Control Server
+    description: >-
+      Start a Claude Code Remote Control server in the background when the add-on
+      boots, without opening the web terminal. From claude.ai/code or the Claude
+      mobile app you can then start new sessions that run in /homeassistant, not just
+      steer an existing one. Restarts automatically if it exits; view it with
+      "tmux attach -t rc". Requires Enable Remote Control. Security note: anyone who
+      can sign in to the linked Claude account can start new root sessions on your
+      Home Assistant host.
+  remote_control_permission_mode:
+    name: Remote Control Permission Mode
+    description: >-
+      Permission mode for sessions started through the Remote Control server.
+      "default" asks you to approve actions from the app; "acceptEdits" approves file
+      edits; "auto" lets Claude decide which actions are safe to run; "plan" only
+      plans; "dontAsk" denies anything not pre-approved. Only applies when Remote
+      Control Server is on.
 
 network:
   7681/tcp: Web Terminal (ttyd)
