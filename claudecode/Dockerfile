@@ -38,7 +38,7 @@ FROM ${BUILD_FROM}
 LABEL maintainer="Robson Felix"
 LABEL org.opencontainers.image.title="Claude Code for Home Assistant"
 LABEL org.opencontainers.image.description="Claude Code CLI with web terminal and HA integration"
-LABEL org.opencontainers.image.source="https://github.com/robsonfelix/robsonfelix-hass-addons"
+LABEL org.opencontainers.image.source="https://github.com/megawubs/hass-addons"
 LABEL org.opencontainers.image.licenses="MIT"
 
 # Environment setup
@@ -112,6 +112,22 @@ RUN chmod +x /usr/local/bin/install-claude.sh \
 
 # Install hass-mcp for Home Assistant integration and pymodbus for Modbus operations
 RUN pip3 install --no-cache-dir --break-system-packages hass-mcp pymodbus pyserial
+
+# Test-suite of the Home Assistant config (`uv run pytest` in /homeassistant): uv,
+# run on the image's own Python (3.14, see build.yaml - Home Assistant itself needs
+# it). uv publishes no musl Python for aarch64, so downloads stay off and every
+# arch runs the same interpreter. The cache and the project environment live in
+# /data/uv: persistent, left out of backups (config.yaml backup_exclude) and the
+# only place the AppArmor profile lets compiled extensions run from.
+# prepare-config-tests links /homeassistant/.venv there at boot.
+ARG UV_VERSION=0.11.32
+RUN pip3 install --no-cache-dir --break-system-packages "uv==${UV_VERSION}" \
+    && apk add --no-cache tzdata
+ENV UV_CACHE_DIR=/data/uv/cache \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON_PREFERENCE=only-system
+COPY rootfs/usr/local/bin/prepare-config-tests /usr/local/bin/prepare-config-tests
+RUN chmod +x /usr/local/bin/prepare-config-tests
 
 # Install mbpoll (Modbus command line tool) from source
 RUN apk add --no-cache --virtual .build-deps \
@@ -360,6 +376,12 @@ CMD ["/bin/bash", "-c", "\
     echo '[WARN] Remote Control server is enabled but was skipped: the claude CLI is not responding'; \
   fi && \
   { /usr/local/bin/stdin-runner.sh <&0 & } && \
+  PREPARE_TESTS=$(jq -r 'if .prepare_config_tests == null then true else .prepare_config_tests end' /data/options.json) && \
+  if [ \"$PREPARE_TESTS\" = \"true\" ]; then \
+    { /usr/local/bin/prepare-config-tests < /dev/null & }; \
+  else \
+    echo '[INFO] Preparing the config test-suite is off (prepare_config_tests)'; \
+  fi && \
   cd /homeassistant && \
   exec ttyd --port 7681 --writable --ping-interval 30 --max-clients 5 \
     --index /usr/share/ttyd/index.html \

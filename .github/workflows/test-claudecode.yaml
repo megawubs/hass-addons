@@ -1,0 +1,43 @@
+# The Claude Code add-on's own test-suite (claudecode/tests) and the check that its
+# options, schema, translations and changelog agree. The other add-ons have no tests.
+# Read-only: nothing here can push, comment or publish.
+name: Test claudecode
+
+on:
+  pull_request:
+    paths:
+      - "claudecode/**"
+      - ".github/scripts/check-addon-options.py"
+      - ".github/workflows/test-claudecode.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "claudecode/**"
+      - ".github/scripts/check-addon-options.py"
+      - ".github/workflows/test-claudecode.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-claudecode-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # The add-on's base image (claudecode/build.yaml: base-python:3.14-alpine3.24)
+          python-version: "3.14"
+      - name: Tools the tests call
+        run: sudo apt-get update -q && sudo apt-get install -y -q tmux
+      - name: Options, schema, translations and changelog agree
+        run: pip install -q pyyaml && python3 .github/scripts/check-addon-options.py claudecode
+      - name: Unit tests
+        working-directory: claudecode
+        run: python3 -m unittest discover -s tests -v

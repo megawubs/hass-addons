@@ -103,6 +103,13 @@ configuration:
       edits; "auto" lets Claude decide which actions are safe to run; "plan" only
       plans; "dontAsk" denies anything not pre-approved. Only applies when Remote
       Control Server is on.
+  prepare_config_tests:
+    name: Prepare the config test-suite
+    description: >-
+      At start-up, check out the git submodules of /homeassistant and install
+      its Python test dependencies (uv sync) in the background, so `uv run
+      pytest` is ready to go. Only does something when /homeassistant has a
+      pyproject.toml.
 
 network:
   7681/tcp: Web Terminal (ttyd)

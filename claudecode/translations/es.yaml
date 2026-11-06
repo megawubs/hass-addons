@@ -109,5 +109,13 @@ configuration:
   task_max_runtime_minutes:
     name: Tiempo maximo de ejecucion (minutos)
     description: Las ejecuciones headless se terminan despues de estos minutos.
+  prepare_config_tests:
+    name: Preparar las pruebas de la configuración
+    description: >-
+      Al arrancar, descarga los submódulos git de /homeassistant e instala en
+      segundo plano sus dependencias de pruebas de Python (uv sync), para que
+      `uv run pytest` esté listo. Solo actúa si /homeassistant tiene un
+      pyproject.toml.
+
 network:
   7681/tcp: Terminal Web (ttyd)

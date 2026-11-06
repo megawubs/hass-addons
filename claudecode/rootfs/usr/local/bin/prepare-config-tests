@@ -1,0 +1,68 @@
+#!/bin/bash
+# Get the Home Assistant config's test-suite ready to run, at boot, in the background.
+#
+# The config in /homeassistant can carry its own Python test-suite (a pyproject.toml
+# + uv.lock, run with `uv run pytest`). This script does the slow one-time work up
+# front so the first `uv run pytest` in a session does not start with a few minutes
+# of downloads:
+#
+#   1. /homeassistant/.venv becomes a symlink to /data/uv/venv. The environment holds
+#      compiled extensions, and the AppArmor profile only lets code be mapped and run
+#      from /data/uv - not from /homeassistant. /data/uv is also left out of add-on
+#      backups (backup_exclude), and a symlink keeps ~1 GB out of the HA backups.
+#   2. git submodules are checked out (vendored custom integrations, Jinja macros).
+#   3. `uv sync` installs the locked dependencies.
+#
+# Every step is skipped when it does not apply, and nothing here stops the add-on:
+# failures are logged and the terminal starts regardless.
+set -u -o pipefail
+
+CONFIG_DIR="${CONFIG_TESTS_DIR:-/homeassistant}"
+VENV_DIR="${CONFIG_TESTS_VENV:-/data/uv/venv}"
+
+log() { echo "[config-tests] $*"; }
+
+if [ ! -f "$CONFIG_DIR/pyproject.toml" ]; then
+    log "No pyproject.toml in $CONFIG_DIR - nothing to prepare"
+    exit 0
+fi
+
+mkdir -p "$VENV_DIR" "${UV_CACHE_DIR:-/data/uv/cache}"
+
+venv_link="$CONFIG_DIR/.venv"
+if [ -L "$venv_link" ]; then
+    if [ "$(readlink "$venv_link")" != "$VENV_DIR" ]; then
+        ln -sfn "$VENV_DIR" "$venv_link"
+        log "Repointed $venv_link to $VENV_DIR"
+    fi
+elif [ -d "$venv_link" ] && [ -f "$venv_link/pyvenv.cfg" ]; then
+    # A virtualenv created inside the config dir cannot run here (AppArmor) and is
+    # rebuilt from uv.lock in a minute, so replace it rather than leave it broken.
+    rm -rf "$venv_link"
+    ln -s "$VENV_DIR" "$venv_link"
+    log "Replaced the virtualenv in $venv_link with a symlink to $VENV_DIR"
+elif [ -e "$venv_link" ]; then
+    log "WARNING: $venv_link exists and is not a virtualenv - left alone; uv will not be able to use it"
+else
+    ln -s "$VENV_DIR" "$venv_link"
+    log "Linked $venv_link to $VENV_DIR"
+fi
+
+cd "$CONFIG_DIR" || exit 0
+
+if [ -f .gitmodules ] && git rev-parse --git-dir > /dev/null 2>&1; then
+    if timeout 300 git submodule update --init --recursive 2>&1 | sed 's/^/[config-tests] git: /'; then
+        log "git submodules checked out"
+    else
+        log "WARNING: git submodule update failed - run it by hand: git submodule update --init"
+    fi
+fi
+
+sync_args=()
+[ -f uv.lock ] && sync_args+=(--frozen)
+log "Installing the test dependencies (uv sync ${sync_args[*]:-}) ..."
+if timeout 1800 nice -n 10 uv sync "${sync_args[@]}" 2>&1 | tail -5 | sed 's/^/[config-tests] uv: /'; then
+    log "Ready: run the tests with 'uv run pytest' in $CONFIG_DIR"
+else
+    log "WARNING: uv sync failed - 'uv run pytest' will retry it"
+fi

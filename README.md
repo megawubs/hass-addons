@@ -15,6 +15,7 @@ This repository contains the following add-ons
 ### [openaudible](./openaudible)
 ### [OPDS Proxy](./opds-proxy)
 ### [Bookclerk](./bookclerk)
+### [Claude Code](./claudecode)
 
 
 <!--

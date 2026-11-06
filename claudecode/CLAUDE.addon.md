@@ -22,6 +22,15 @@ When users mention `/config/...`, translate to `/homeassistant/...`
 
 Use the `homeassistant` MCP server to query entities and call services.
 
+## Running the Config's Tests
+
+If `/homeassistant` has a `pyproject.toml`, run its test-suite with `uv run pytest` from
+`/homeassistant`. Python 3.14 and uv are installed; uv never downloads another Python.
+`/homeassistant/.venv` is a symlink to `/data/uv/venv` - keep it that way: compiled modules
+cannot load from `/homeassistant` (AppArmor), so do not create a virtualenv there. If
+submodules are missing: `git submodule update --init`. The add-on runs both at start-up
+in the background (`[config-tests]` lines in the add-on log).
+
 ## Reading Home Assistant Logs
 
 **Log levels (from most to least verbose):**

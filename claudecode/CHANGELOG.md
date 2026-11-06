@@ -2,10 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.3.0] - 2026-11-06
 
 ### Added
-- A test-suite (`make test`, `.github/workflows/tests.yml`): `claude-login-url`
+- Moved into `megawubs/hass-addons` (history kept with `git subtree`); `url` and the image
+  source label point there
+- Everything to run the Home Assistant config's own test-suite (`uv run pytest` in
+  `/homeassistant`): uv 0.11.32, Python 3.14 from the base image (`UV_PYTHON_DOWNLOADS=never`,
+  uv has no musl Python for aarch64), `tzdata`, the uv cache in `/data/uv/cache`
+- `prepare_config_tests` option (default on): at start-up, in the background, links
+  `/homeassistant/.venv` to `/data/uv/venv`, checks out git submodules and runs
+  `uv sync --frozen`. Logged as `[config-tests]`. Tested in
+  `tests/test_prepare_config_tests.py`
+- AppArmor: `/data/uv/**` may be mapped and executed (`rwixmk`). Compiled extensions and
+  console scripts of the test environment run from there; nowhere else in `/data` or
+  `/homeassistant` allows it
+- `backup_exclude: uv`: the ~1 GB cache and environment stay out of add-on backups
+
+### Changed
+- Base image from `base-python:3.13-alpine3.21` to `base-python:3.14-alpine3.24`. Home
+  Assistant (and `pytest-homeassistant-custom-component`) needs Python 3.14.2+
+
+### Added (unreleased upstream work, shipped in this version)
+- A test-suite (run with `python3 -m unittest discover -s tests` from `claudecode/`;
+  CI: `.github/workflows/test-claudecode.yaml`): `claude-login-url`
   against a real tmux, `stdin-runner.sh` through a pipe with a fake `claude` and
   a fake Supervisor, `bash -n` on every shell script, and the Dockerfile's CMD
   parsed the way Docker reads it. `stdin-runner.sh` takes `STDIN_RUNNER_*`

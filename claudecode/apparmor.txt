@@ -46,6 +46,10 @@ profile claudecode flags=(attach_disconnected,mediate_deleted) {
 
   # Add-on data
   /data/** rwk,
+  # uv cache and the config test-suite's environment (prepare-config-tests):
+  # compiled extensions are mapped (m) and console scripts such as pytest run
+  # (ix) from here. /homeassistant/.venv is a symlink to /data/uv/venv.
+  /data/uv/** rwixmk,
 
   # Home Assistant config - main working directory
   /homeassistant/ r,

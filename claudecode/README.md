@@ -23,7 +23,8 @@ claude "Why isn't my motion sensor automation working?"
 - **hass-mcp Integration**: Direct control of HA entities and services
 - **Session Persistence**: Optional tmux integration to preserve sessions across page refreshes
 - **Customizable Theme**: Choose between dark and light terminal themes
-- **Multi-Architecture**: Supports amd64, aarch64, armv7, armhf, and i386
+- **Multi-Architecture**: Supports amd64 and aarch64
+- **Config test-suite**: Python 3.14, `uv` and `git` to run a pytest suite kept in your config (`uv run pytest`)
 - **Secure Authentication**: Claude Code handles its own authentication securely
 
 ## Setup
@@ -179,6 +180,7 @@ Then: `action: script.claude_agent` with `prompt:` / `run_id:` data.
 | `extra_npm_packages` | List of npm package specs to install at every container start under `/homeassistant/.claudecode/npm-global` (persistent across add-on rebuilds). Bin dir is on `PATH`. Use to add custom MCP servers without forking the Dockerfile. | `[]` |
 | `remote_control_server` | Run a Remote Control server at boot so you can start new sessions from claude.ai/code or the Claude mobile app. Requires `enable_remote_control` | false |
 | `remote_control_permission_mode` | Permission mode for sessions started through the server: `default`, `acceptEdits`, `auto`, `plan` or `dontAsk` | default |
+| `prepare_config_tests` | At start-up, check out the git submodules of `/homeassistant` and run `uv sync` in the background so the config's test-suite (`uv run pytest`) is ready. See [Testing your configuration](#testing-your-configuration) | true |
 
 ### Remote Control
 
@@ -214,6 +216,39 @@ The MCP registration itself is persistent (stored in `~/.claude/settings.json`, 
 - Re-installs on every container start; unpinned packages get the latest each time.
 - A bad package name logs `[WARN]` but doesn't stop the add-on.
 - Don't know the binary name? Run `ls /homeassistant/.claudecode/npm-global/bin/` after install.
+
+## Testing your configuration
+
+If `/homeassistant` holds a Python test-suite managed with [uv](https://docs.astral.sh/uv/) (a
+`pyproject.toml`, ideally with a `uv.lock`) - for example BDD tests built on
+`pytest-homeassistant-custom-component` - the add-on can run it:
+
+```bash
+cd /homeassistant
+uv run pytest
+```
+
+What the add-on provides:
+
+- **Python 3.14** from the base image. Home Assistant 2025.12+ (and so
+  `pytest-homeassistant-custom-component`) requires it. uv is set to use this interpreter
+  only (`UV_PYTHON_DOWNLOADS=never`): uv has no musl Python build for aarch64.
+- **uv** (pinned in the Dockerfile) with its cache in `/data/uv/cache`.
+- **The environment in `/data/uv/venv`**, with `/homeassistant/.venv` as a symlink to it. That
+  keeps about 1 GB of packages out of your Home Assistant backups, and it is the only place the
+  add-on's AppArmor profile allows compiled extensions to run from. `/data/uv` is excluded from
+  the add-on's own backups too; it is rebuilt from `uv.lock` when missing.
+- **`prepare_config_tests`** (on by default): at start-up, in the background, it creates that
+  symlink, runs `git submodule update --init --recursive` and `uv sync --frozen`. Progress shows in
+  the add-on log as `[config-tests]` lines. The first run downloads a few hundred MB; later
+  starts only check. Without it, `uv run pytest` does the sync itself on first use, but
+  submodules you must check out yourself.
+- **`git`**, so Claude Code hooks in your config that run `uv run pytest` before a `git commit`
+  work as they do on your own machine.
+
+Add `.venv` to your config's `.gitignore`. Don't create the environment with `python -m venv`
+inside `/homeassistant`: AppArmor blocks loading compiled modules from there, and the add-on
+replaces such a virtualenv with the symlink at the next start.
 
 ## File Locations
 
