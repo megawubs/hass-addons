@@ -1,0 +1,98 @@
+#!/bin/bash
+# `esphome` in this add-on: runs the ESPHome CLI inside the ESPHome Device Builder add-on.
+#
+# The toolchains (ESP-IDF, PlatformIO, compilers) are GBs, glibc-only and already
+# installed - with their build cache and the ESPHome version that matches the
+# dashboard - in the ESPHome add-on. So rather than shipping a second copy, this
+# wrapper forwards the command there with `docker exec`:
+#
+#   esphome compile esphome/m5dial-woonkamer.yaml
+#   cd esphome/wall-pad && esphome upload wall-pad.yaml --device 192.168.68.115
+#   esphome logs esphome/wall-pad/wall-pad.yaml --device 192.168.68.115
+#
+# Paths under /homeassistant (absolute or relative to the current directory) become
+# the same path under /config, which is where the ESPHome add-on sees the HA config,
+# and the command runs in the matching working directory, so relative !include and
+# component paths keep working. Everything else is passed through unchanged.
+#
+# Needs the Docker socket: turn "Protection mode" off for this add-on.
+#
+# Overrides: ESPHOME_CONTAINER (container name; default: found with `docker ps`),
+# ESPHOME_LOCAL_ROOT (default /homeassistant), ESPHOME_REMOTE_ROOT (default /config).
+set -u
+
+LOCAL_ROOT=$(realpath -m -- "${ESPHOME_LOCAL_ROOT:-/homeassistant}")
+REMOTE_ROOT="${ESPHOME_REMOTE_ROOT:-/config}"
+
+die() {
+    echo "esphome (wrapper): $*" >&2
+    exit "${EXIT_CODE:-1}"
+}
+
+if ! command -v docker > /dev/null 2>&1; then
+    EXIT_CODE=69 die "docker CLI not found in this add-on"
+fi
+
+if ! docker info > /dev/null 2>&1; then
+    EXIT_CODE=69 die "no access to Docker. ESPHome runs inside the ESPHome add-on and is
+reached with 'docker exec', which needs the Docker socket. In Home Assistant open
+Settings > Add-ons > Claude Code > Info, turn 'Protection mode' off and restart the add-on."
+fi
+
+find_container() {
+    local names stable
+    names=$(docker ps --format '{{.Names}}' | grep -E '^(app|addon)_[0-9a-z]+_esphome([-_].*)?$' || true)
+    [ -n "$names" ] || return 1
+    # The stable add-on (…_esphome) wins over beta/dev builds that run next to it.
+    stable=$(printf '%s\n' "$names" | grep -E '_esphome$' || true)
+    if [ "$(printf '%s\n' "$stable" | grep -c .)" -eq 1 ]; then
+        printf '%s\n' "$stable"
+    elif [ "$(printf '%s\n' "$names" | grep -c .)" -eq 1 ]; then
+        printf '%s\n' "$names"
+    else
+        echo "esphome (wrapper): more than one ESPHome container is running:" >&2
+        printf '  %s\n' $names >&2
+        echo "esphome (wrapper): pick one with ESPHOME_CONTAINER=<name>" >&2
+        return 2
+    fi
+}
+
+container="${ESPHOME_CONTAINER:-}"
+if [ -z "$container" ]; then
+    container=$(find_container)
+    case $? in
+        0) ;;
+        2) exit 1 ;;
+        *) EXIT_CODE=69 die "no running ESPHome add-on container found (looked for app_<id>_esphome). Is the ESPHome Device Builder add-on started?" ;;
+    esac
+fi
+
+# /homeassistant/x -> /config/x; prints nothing for a path outside LOCAL_ROOT.
+to_remote() {
+    local abs
+    abs=$(realpath -m -- "$1" 2>/dev/null) || return 1
+    case "$abs" in
+        "$LOCAL_ROOT") printf '%s\n' "$REMOTE_ROOT" ;;
+        "$LOCAL_ROOT"/*) printf '%s\n' "$REMOTE_ROOT${abs#"$LOCAL_ROOT"}" ;;
+        *) return 1 ;;
+    esac
+}
+
+args=()
+for arg in "$@"; do
+    # Only arguments that are paths: an existing file/dir, or a .yaml/.yml name
+    # (`esphome wizard new.yaml` creates it). Flags, IPs, device names pass as-is.
+    if [ "${arg#-}" = "$arg" ] && { [ -e "$arg" ] || [[ "$arg" == *.yaml || "$arg" == *.yml ]]; } \
+        && remote=$(to_remote "$arg"); then
+        args+=("$remote")
+    else
+        args+=("$arg")
+    fi
+done
+
+workdir=$(to_remote "$PWD") || workdir="$REMOTE_ROOT"
+
+exec_flags=(-i -w "$workdir")
+[ -t 0 ] && [ -t 1 ] && exec_flags+=(-t)
+
+exec docker exec "${exec_flags[@]}" "$container" esphome "${args[@]}"

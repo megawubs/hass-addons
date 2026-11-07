@@ -1,0 +1,687 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.3.1] - 2026-11-07
+
+### Added
+- `esphome` command: runs the ESPHome CLI inside the ESPHome Device Builder add-on with
+  `docker exec`, so `esphome config|compile|upload|logs <file>.yaml` works from the terminal
+  and from Claude Code without shipping a second toolchain. Finds the container itself
+  (`app_<id>_esphome`, the stable add-on over beta/dev; `ESPHOME_CONTAINER` overrides),
+  maps paths under `/homeassistant` to `/config` and runs in the matching directory so
+  relative `!include`s work. Without Docker access it says to turn protection mode off.
+  Tested in `tests/test_esphome_wrapper.py`
+- AppArmor: read/write on the Docker socket, so `docker exec` works once protection mode is off
+
+## [1.3.0] - 2026-11-06
+
+### Added
+- Moved into `megawubs/hass-addons` (history kept with `git subtree`); `url` and the image
+  source label point there
+- Everything to run the Home Assistant config's own test-suite (`uv run pytest` in
+  `/homeassistant`): uv 0.11.32, Python 3.14 from the base image (`UV_PYTHON_DOWNLOADS=never`,
+  uv has no musl Python for aarch64), `tzdata`, the uv cache in `/data/uv/cache`
+- `prepare_config_tests` option (default on): at start-up, in the background, links
+  `/homeassistant/.venv` to `/data/uv/venv`, checks out git submodules and runs
+  `uv sync --frozen`. Logged as `[config-tests]`. Tested in
+  `tests/test_prepare_config_tests.py`
+- AppArmor: `/data/uv/**` may be mapped and executed (`rwixmk`). Compiled extensions and
+  console scripts of the test environment run from there; nowhere else in `/data` or
+  `/homeassistant` allows it
+- `backup_exclude: uv`: the ~1 GB cache and environment stay out of add-on backups
+
+### Changed
+- Base image from `base-python:3.13-alpine3.21` to `base-python:3.14-alpine3.24`. Home
+  Assistant (and `pytest-homeassistant-custom-component`) needs Python 3.14.2+
+
+### Added (unreleased upstream work, shipped in this version)
+- A test-suite (run with `python3 -m unittest discover -s tests` from `claudecode/`;
+  CI: `.github/workflows/test-claudecode.yaml`): `claude-login-url`
+  against a real tmux, `stdin-runner.sh` through a pipe with a fake `claude` and
+  a fake Supervisor, `bash -n` on every shell script, and the Dockerfile's CMD
+  parsed the way Docker reads it. `stdin-runner.sh` takes `STDIN_RUNNER_*`
+  overrides for its paths and the Supervisor address so the tests can point it
+  at a scratch directory; the defaults are unchanged
+
+## [1.2.76] - 2026-11-01
+
+### Fixed
+- Translations added in 1.2.75 for `default_task_model`, `default_task_allowed_tools` and `task_max_runtime_minutes` (plus the four remote-control keys in `fr.yaml`) were appended to the end of each file, which placed them under the `network:` section instead of `configuration:`. The Supervisor reads option names from `configuration:`, so those options rendered untranslated. Caught by the new CI check on its first run
+
+### Removed
+- Dropped the `armv7`, `armhf` and `i386` architectures from `config.yaml` and `build.yaml`. Home Assistant stopped supporting them in 2025.12 (3 December 2025), so the add-on was declaring and building three targets that no supported installation can run. Flagged by the add-on linter that arrived with CI in this release
+
+### Changed
+- Removed four redundant keys from `config.yaml`, flagged by the add-on linter that landed with CI in this release. `startup: application`, `boot: auto` and `init: true` all restated the Supervisor's own defaults, and `uart: true` is implied by `full_access: true`. No behaviour change — the effective configuration is identical
+
+## [1.2.75] - 2026-11-01
+
+### Added
+- Headless runs triggered from automations: send a JSON task (prompt or
+  prompt_file, optional model/allowed_tools/run_id) via the built-in
+  `hassio.addon_stdin` service; the add-on runs `claude -p` with the
+  already-stored authentication, serializes runs, enforces
+  `task_max_runtime_minutes`, logs transcripts to the add-on config dir,
+  and fires `claudecode_run_started` / `claudecode_run_finished` events
+  for automations to react to. New options: `default_task_model`,
+  `default_task_allowed_tools`, `task_max_runtime_minutes`.
+
+- Task runner now reads stdin concurrently with a running task:
+  `{"abort": true}` hard-kills the active run (reported with
+  `aborted: true` on `claudecode_run_finished`), and a task arriving
+  while one is active is rejected with a `claudecode_run_rejected`
+  event instead of silently queueing.
+
+## [1.2.74] - 2026-11-01
+
+
+### Added
+- `remote_control_server` option (#26). `enable_remote_control` only affects sessions started in the web terminal, so nothing was reachable remotely until someone opened the terminal after each boot. With this option on (it also requires `enable_remote_control`), the add-on starts `claude remote-control` in a background tmux session (`rc`) at boot, so claude.ai/code and the Claude mobile app can start new sessions in `/homeassistant` without opening the terminal. It restarts after 30s if it exits, and is skipped with a warning when the startup health gate finds the CLI unresponsive
+- `remote_control_permission_mode` option: permission mode for sessions started through the server (`default`, `acceptEdits`, `auto`, `plan`, `dontAsk`)
+
+## [1.2.73] - 2026-11-01
+
+
+### Added
+- `claude-login-url` command: pulls the OAuth login URL out of the `claude` tmux session (via `tmux capture-pane -J`, which rejoins soft-wrapped lines) and saves it to `/homeassistant/claude-login-url.txt`. Works around two upstream limitations that otherwise block signing in: ttyd's bundled xterm.js does not implement OSC 52 clipboard writes, so the CLI's own "press `c` to copy" hint is a no-op here; and its link detector only scans one rendered terminal row at a time, so a login URL that wraps across lines never becomes a single clickable link either. Documented in the README's authentication section
+
+## [1.2.72] - 2026-11-01
+
+
+### Added
+- `auto_launch_claude` option: start Claude Code automatically when the web terminal opens — `off` (plain shell, the default and previous behavior), `new` (fresh session), or `continue` (resume the most recent session via `claude --continue`). When Claude Code exits, the wrapper drops into a login shell so the terminal stays usable. Auto-launch is skipped (with the existing health-gate warning) when the `claude` CLI is not responding, and picks up `--remote-control` automatically when `enable_remote_control` is on — as do the `c`/`cc` aliases
+
+## [1.2.71] - 2026-11-01
+
+### Added
+- `extra_npm_packages` option: list of npm package specs to install on every container start under `/homeassistant/.claudecode/npm-global` (persistent across add-on rebuilds). The bin directory is on `PATH`. Use it to add custom MCP servers without forking the Dockerfile; a failed install logs a `[WARN]` but never blocks startup
+
+## [1.2.70] - 2026-11-01
+
+### Fixed
+- Playwright Browser hostname auto-detection never worked: startup read `.hostname` from the Supervisor `/addons` list endpoint, but that endpoint doesn't return `hostname` (it only exists on `/addons/{slug}/info`), so detection always fell through to the literal `playwright-browser` fallback — which never resolves on HA's network (real add-on hostnames look like `<repo-id>-playwright-browser`). The hostname is now derived from the add-on `.slug` (underscores → hyphens; HA add-on hostnames are deterministic) by a small launcher script that runs each time the MCP server starts — so it also works when Playwright Browser is installed or started *after* Claude Code, without restarting this add-on. The `playwright_cdp_host` override still takes precedence
+- `@playwright/mcp` is now installed at build time under `/opt/playwright-mcp` (with a `playwright-mcp` symlink in `/usr/local/bin`) instead of relying on a pre-seeded npx cache. The `/opt` prefix avoids the `/usr/local/bin/mcp` binary-name collision with `hass-mcp`, the npm cache no longer ships in the image, and the MCP server no longer depends on npx cache state at runtime
+
+## [1.2.69] - 2026-11-01
+
+### Added
+- `~/.claude/CLAUDE.user.md` — a user-managed instructions file, created empty and whose content the add-on never touches. It's imported by the add-on-managed `~/.claude/CLAUDE.md`, so anything you put there loads into every Claude Code session and survives restarts and add-on rebuilds. Created empty on purpose, and documented in the README rather than in the model-visible files: both `CLAUDE.md` and `CLAUDE.user.md` are fed to the model verbatim, so explanatory boilerplate in either would be injected into every session
+
+### Changed
+- The add-on-managed `~/.claude/CLAUDE.md` is now a static `CLAUDE.addon.md` file copied into the image, instead of a ~55-line escaped `printf` inside the Dockerfile `CMD`. Easier to maintain and review. Content is unchanged apart from the `CLAUDE.user.md` import added at the end — and the stray backslashes are gone: the printf's quoting wrote a literal `\` before every backtick into the generated file
+
+## [1.2.68] - 2026-11-01
+
+### Changed
+- Image size: the Claude Code install now runs `npm cache clean --force` and removes `/root/.npm` and `/tmp` in the same `RUN` layer. The package pulls a ~240MB platform-native binary via optional dependencies, so ~100MB+ of npm cache was being baked into the image
+
+### Added
+- `.dockerignore` keeps the Docker build context to just the `Dockerfile`, `install-claude.sh`, and `rootfs/` (docs, images, translations, and add-on metadata are consumed by the HA Supervisor, not the image build)
+
+## [1.2.67] - 2026-11-01
+
+### Added
+- **Working clipboard integration (OSC 52) in the web terminal.** The web
+  client embedded in the ttyd 1.7.7 binary bundles xterm.js 5.4 without the
+  clipboard addon, so OSC 52 writes were silently dropped — the Claude CLI's
+  "press `c` to copy" hint did nothing, and tmux copies never reached the
+  system clipboard. ttyd now serves a newer web client (xterm.js 5.5 +
+  `@xterm/addon-clipboard`) via `--index`; the 1.7.7 binary is unchanged.
+  The client is compiled in a Dockerfile build stage from a pinned ttyd main
+  commit (2922cb8), with yarn honoring the upstream lockfile — the build is
+  reproducible (byte-identical output across runs) and every input is
+  pinned, so nothing drifts between builds.
+  tmux is configured with `set-clipboard on` plus an `Ms` terminal-override
+  pinned to the `c` selection (tmux fills `%p1` with `""` for its own copies
+  and `c` for programs; the clipboard addon drops anything that isn't exactly
+  `c`, so the override prints `%p1` with zero precision and hardcodes `c`).
+  Verified with a headless Chromium against the shipped 1.7.7 binary,
+  including end-to-end from a full amd64 image build: typing, resize, window
+  title, program-initiated OSC 52 (the "press `c`" path), and tmux
+  buffer/copy-mode copies all work. Because tmux stores wrapped output as
+  one logical line, copy-mode copies of the wrapped login URL come out
+  intact — the problem #38 works around, solved at the root.
+  The newer client also helps plain-HTTP setups: its link detector follows
+  URLs across soft-wrapped rows, so a wrapped login URL printed as flowing
+  output is clickable as one complete link, and a `Ctrl+Shift`-drag
+  selection over it copies as one unbroken line via `execCommand` — both
+  verified with the async clipboard API unavailable, as it is on plain HTTP.
+  Limitations, also verified: OSC 52 itself needs HTTPS or localhost —
+  on plain HTTP the write is dropped harmlessly and the drag gestures
+  remain the copy path; and rows painted by full-screen UIs carry no wrap
+  metadata, so drag-selection there still sees one row at a time (the
+  click covers the login URL — see below — with the browser zoom-out
+  trick as the text-selection fallback). The main-branch client on a
+  1.7.7 server is an unreleased pairing; the build stage and `--index`
+  flag should be dropped when the next ttyd release ships. README updated
+  (copy table, authentication flow, trade-offs list).
+- **The wrapped `/login` URL is clickable — and opens as one complete
+  link.** The login screen hard-wraps the OAuth URL into separate rows
+  (real newlines, no wrap metadata), so the link detector, drag-selection,
+  and click each saw only one row's fragment — and on plain HTTP, where
+  the `c` (OSC 52) copy hint is blocked by the browser, that left no
+  working path to log in. But the CLI prints every one of those rows
+  wrapped in an OSC 8 hyperlink whose metadata carries the *complete*
+  URL, and the xterm.js 5.5 client activates OSC 8 links out of the box.
+  The missing piece was tmux: it re-emits pane hyperlinks only when the
+  outer terminal declares the `hyperlinks` terminal-feature, which its
+  default `xterm*` feature list lacks — so the links were silently
+  stripped. A one-line `terminal-features` override in `.tmux.conf`
+  fixes it (needs tmux ≥ 3.4; the Alpine 3.21 base ships 3.5a). Clicking
+  any row of the wrapped URL now opens the complete OAuth URL in a new
+  tab after the terminal's confirmation dialog — a navigation, not a
+  clipboard write, so it works on plain HTTP too. Verified by replaying
+  a captured real `/login` byte stream (Claude Code 2.1.233) through the
+  shipped ttyd 1.7.7 binary plus the built web client in a headless
+  Chromium: without the override a click opened only the truncated
+  first-row fragment; with it, clicks on the first row and on a
+  continuation row each opened the full URL, and tmux OSC 52 copies
+  still landed on the clipboard.
+
+## [1.2.66] - 2026-11-01
+
+### Added
+- `poppler-utils` is now installed, so Claude Code's `Read` tool can open PDF files (#45). `Read` renders PDF pages by shelling out to `pdftoppm`, which ships in that package and was missing from the image, so every PDF read failed with `pdftoppm is not installed. Install poppler-utils ... to enable PDF page rendering`
+
+  This could not be worked around at runtime: `apk` returns `Permission denied` on exec inside the running add-on even as root, so the package has to be baked in at build time
+
+  Verified present in Alpine 3.21 `main` as `poppler-utils 24.02.0-r2` for `x86_64`, `aarch64` and `armv7`. It costs roughly 20 MiB of image size, mostly `poppler`, `cairo`, `libx11` and `nss` — there is no lighter option, because `Read` invokes `pdftoppm` specifically rather than any PDF renderer
+
+### Fixed
+- `terminal_theme: light` had no effect (#49). ttyd's `-t key=value` splits on the first `=`, so `-t "theme=background=#eff1f5,foreground=..."` set `theme` to the bare string `background=#eff1f5,...`. The client merges preferences with `Object.assign({}, defaultDarkTheme, theme)`, and a string contributes no keys, so the built-in dark theme survived untouched — the setting appeared ignored rather than failing. `theme` is now passed as a JSON object
+
+- The AVX check is now architecture-aware (#54, likely also #50). `grep -qw avx /proc/cpuinfo` was run unconditionally, but AVX is an x86 instruction set and the string can never appear on `aarch64`/`armv7`/`armhf`. Every ARM host therefore took the "missing AVX" branch on every boot and printed a warning telling the user to change a Proxmox VM CPU type that does not exist. The check now runs only on `x86_64`/`amd64`/`i[3-6]86`
+
+- The startup log reported the build-time version instead of the installed one. `[INFO] Claude Code $BUILT_VERSION (verified at build time)` echoed `/etc/claude-code-version` regardless of what npm had actually installed, so the log and `claude --version` disagreed — reported as 2.1.263 against an installed 2.1.314. The log now reports the installed version, falling back to the build-time value only when the CLI cannot be queried
+
+- `auto_update_claude: true` ran `npm update -g` on every boot even when the installed version was already current. With the 30s smoke test and the 300s rollback behind it, a boot could spend up to ~10 minutes before `ttyd` bound its port, and Home Assistant reported the add-on as unhealthy. Startup now asks the registry for the current version first and skips the install entirely when it matches — the common case, which costs seconds instead of minutes
+
+- Rollback after a failed update reinstalled `$BUILT_VERSION` rather than the version that was running a moment earlier, silently downgrading hosts that had updated successfully in the past. It now rolls back to the previously installed version
+
+- On a CPU that genuinely lacks AVX, `auto_update_claude: true` would install a release that cannot run, fail the smoke test and roll back on every boot. The update is now skipped on those hosts with an explicit message
+
+## [1.2.65] - 2026-07-08
+
+### Security
+- The Supervisor token is no longer written to `settings.json`. `update_mcp_token()` in `.bashrc` wrote `$SUPERVISOR_TOKEN` into `/homeassistant/.claudecode/settings.json` on every `c`/`cc`, persisting a live credential into the HA config directory — which is included in every backup. The key was also dead: `hass-mcp` reads `HA_TOKEN` from the environment, which the add-on already exports, and never reads `HASS_TOKEN`. The function is removed and any previously persisted token is scrubbed once on startup
+- The token was also interpolated unescaped into a `jq` filter string; removing the function eliminates that too
+- AppArmor now grants write access only to `/usr/local/bin/**` and `/usr/local/lib/node_modules/**` — the two subtrees npm needs — instead of all of `/usr/local/**`
+
+### Fixed
+- Add-on failed to start on hosts whose CPU lacks AVX (#24). Claude Code 2.1.113 replaced the JavaScript entrypoint with a Bun-compiled native binary, and Bun's JavaScriptCore requires AVX. On a VM exposing the generic `kvm64` CPU model, every `claude` invocation hangs — including `claude --version` (see anthropics/claude-code#19981, #50270). The hang blocked the startup chain at `claude mcp remove`, so `ttyd` never bound port 7681 and the add-on stayed unhealthy with a near-empty log
+
+  Fix this at the hypervisor: set the VM's CPU type to `host` (Proxmox) or enable host CPU passthrough, then stop and start the VM. Verify with `grep -o -m1 avx2 /proc/cpuinfo`. Versions <= 2.1.112 still run without AVX because they execute as JavaScript under Node.
+
+- `auto_update_claude` never worked (#22). AppArmor granted `/usr/local/** ixr`, so npm's global prefix was not writable and `npm -g` failed with `EACCES` on rename even as root. The cause is AppArmor, not a read-only OverlayFS layer, and `2>/dev/null` hid the error on every boot
+- Build failed with `dockerfile parse error: unknown instruction: set` (#19). The `.tmux.conf` and `.bashrc` heredocs (`RUN cat > file << 'EOF'`) need BuildKit plus a `# syntax=docker/dockerfile:1.4` directive; they are now plain `COPY` of files under `rootfs/`, which every builder supports
+- Build aborted on a transient DNS failure while downloading the Home Assistant CLI, `curl` exit 6 (#23). The `ha` and `ttyd` downloads now retry (`--retry 5 --retry-delay 2 --retry-all-errors`)
+- Build failed on armv7/armhf/i386 with a 404: the Home Assistant CLI publishes only `amd64` and `aarch64` binaries. Those arches now skip the CLI with a warning instead of failing the build
+- `settings.json` is bootstrapped with `{}` when missing, so the pre-authorized tool list is actually applied on fresh installs instead of the `jq` merge failing silently
+- Turning off `enable_mcp` or `session_persistence` had no effect. Both were read with `jq -r '.option // true'`, and jq's `//` falls back on `false` as well as `null`, so a disabled option resolved back to `true`. Both now use an explicit null check
+
+### Added
+- `install-claude.sh`: resolves the newest Claude Code release that passes a `claude --version` smoke test. Takes `latest` when `latest` works, binary-searches for the newest working release when it does not, and fails the build if none do. No version is hardcoded, so an AVX-less host still gets a working add-on (2.1.112) while an AVX host gets the current release
+- Startup health gate: if the CLI does not respond within 30s, MCP setup is skipped and the terminal starts anyway, so a broken CLI no longer presents as "add-on won't start"
+- Automatic rollback to the build-verified version when `auto_update_claude` installs a release that cannot run
+- Startup warns when the CPU lacks AVX and explains the hypervisor fix
+- Persistent tmux overrides (#25). `/root/.tmux.conf` now ends with `source-file -q /homeassistant/.claudecode/tmux.conf`, so anything you put in that file survives restarts, rebuilds and reinstalls and takes precedence over the shipped defaults. For example, `echo 'set -g mouse off' > /homeassistant/.claudecode/tmux.conf` to get native copy/paste while keeping tmux
+
+### Changed
+- The unpinned `npm install -g @anthropic-ai/claude-code` is replaced by the resolver above; a rebuild can no longer silently swap in a release that does not run
+- Home Assistant CLI pinned to 5.2.0 instead of tracking `latest`
+- `claude mcp` calls are wrapped in `timeout`; a hang can no longer block startup (`|| true` guards non-zero exits, not hangs)
+- Startup no longer discards npm's stderr with `2>/dev/null`
+
+## [1.2.64] - 2026-06-28
+
+### Added
+- New `enable_remote_control` option to automatically start Claude Code with Remote Control enabled for every session, allowing the session to be viewed and steered from claude.ai/code or the Claude mobile app
+- New `remote_control_session_prefix` option to set the prefix for auto-generated Remote Control session names (via `CLAUDE_REMOTE_CONTROL_SESSION_NAME_PREFIX`), defaults to "HomeAssistant"
+- French translation (fr) for Claude Code add-on configuration
+
+## [1.2.63] - 2026-02-23
+
+### Fixed
+- Build failure due to `/usr/local/bin/mcp` conflict between hass-mcp (pip) and @playwright/mcp (npm)
+- Switched from `npm install -g @playwright/mcp` to npx cache approach (pre-cache during build, `npx --no-install` at runtime)
+
+### Changed
+- Playwright Browser add-on: added aarch64 (ARM64) architecture support
+
+## [1.2.62] - 2026-01-26
+
+### Fixed
+- MCP token now auto-updates when starting Claude via `c` or `cc` aliases
+- Fixes "HTTP error: 500" when SUPERVISOR_TOKEN changes after addon restart
+
+## [1.2.61] - 2026-01-16
+
+### Added
+- Full hardware access (`full_access: true`) for Docker socket mounting
+
+## [1.2.60] - 2026-01-16
+
+### Added
+- Docker CLI (`docker` command) to use the Docker API
+
+## [1.2.59] - 2026-01-16
+
+### Added
+- Docker API access (`docker_api: true`)
+
+## [1.2.58] - 2026-01-16
+
+### Added
+- UART/serial port access (`uart: true`)
+
+## [1.2.57] - 2026-01-16
+
+### Added
+- `socat` for bidirectional data transfer between channels
+
+## [1.2.56] - 2026-01-16
+
+### Added
+- `pyserial` Python library for serial port communication
+
+## [1.2.55] - 2026-01-16
+
+### Fixed
+- Removed `unrar` package (not available in Alpine 3.21)
+- Use `7z x file.rar` instead for RAR extraction
+
+## [1.2.54] - 2026-01-16
+
+### Added
+- Archive tools: `p7zip` for 7-Zip and RAR archives (use `7z` command)
+- Modbus tools: `mbpoll` command line Modbus master, `pymodbus` Python library
+- Useful for industrial automation and device communication tasks
+
+## [1.2.53] - 2026-01-15
+
+### Added
+- Auto-detect Playwright Browser hostname using Supervisor API
+- No need to manually configure `playwright_cdp_host` anymore
+- Finds any add-on with slug ending in `playwright-browser`
+
+## [1.2.52] - 2026-01-15
+
+### Fixed
+- Changed Playwright CDP endpoint from `ws://` to `http://` protocol
+- Playwright auto-discovers the WebSocket path via `/json/version`
+- Fixes 404 Not Found error when connecting to Chrome CDP
+
+## [1.2.51] - 2026-01-15
+
+### Added
+- Configurable `playwright_cdp_host` option for custom Playwright Browser hostname
+- Useful when default hostname doesn't resolve (e.g., use `1016f397-playwright-browser`)
+
+## [1.2.50] - 2026-01-15
+
+### Fixed
+- Playwright MCP CDP endpoint hostname corrected to `playwright-browser` (was `local-playwright-browser`)
+- Fixes "ENOTFOUND local-playwright-browser" connection error
+
+## [1.2.49] - 2026-01-15
+
+### Added
+- GitHub CLI (`gh`) for GitHub operations (PRs, issues, repos, etc.)
+
+## [1.2.48] - 2026-01-15
+
+### Changed
+- Playwright MCP now connects to external "Playwright Browser" add-on via CDP
+- Removed Chromium from this add-on (keeps image small ~100MB vs ~2GB)
+- Alpine + Chromium sandbox issues resolved by using separate Ubuntu-based add-on
+
+### Note
+- Requires "Playwright Browser" add-on to be installed and running for browser automation
+
+## [1.2.47] - 2026-01-15
+
+### Fixed
+- Created `/usr/local/bin/chromium-wrapper` script that always passes `--no-sandbox`
+- Playwright MCP config now points to wrapper script
+- Should resolve EACCES and sandbox errors when running as root
+
+## [1.2.46] - 2026-01-15
+
+### Fixed
+- Playwright MCP now uses config file with system Chromium
+- Added `--no-sandbox` and `--disable-dev-shm-usage` flags for container compatibility
+- Uses `/usr/bin/chromium-browser` instead of downloaded Chromium
+
+## [1.2.45] - 2026-01-15
+
+### Fixed
+- MCP servers now configured at user scope (`-s user`) instead of project scope
+- MCPs are now globally available regardless of working directory
+
+## [1.2.44] - 2026-01-14
+
+### Added
+- Playwright MCP server for browser automation (opt-in via `enable_playwright_mcp`)
+- Headless Chromium browser pre-installed
+- Allows Claude to navigate web pages, fill forms, click elements, and take screenshots
+
+## [1.2.43] - 2026-01-14
+
+### Changed
+- Upgraded `hassio_role` from `homeassistant` to `manager`
+- Enables access to other add-ons' logs via `ha addons logs <slug>`
+
+## [1.2.42] - 2026-01-14
+
+### Added
+- `hassio_role: homeassistant` permission for reading core logs
+- Fixes 403 error when using `ha core logs`
+
+## [1.2.41] - 2026-01-14
+
+### Added
+- Installed Home Assistant CLI (`ha` command) in the container
+- `ha core logs`, `ha core restart`, etc. now available
+
+## [1.2.40] - 2026-01-14
+
+### Fixed
+- Updated log commands in CLAUDE.md (`ha` CLI not available in add-on containers)
+- Now uses `/homeassistant/home-assistant.log` and Supervisor API
+
+## [1.2.39] - 2026-01-14
+
+### Added
+- CLAUDE.md now includes Home Assistant logging instructions
+  - Log levels explanation (debug, info, warning, error)
+  - Commands to read and filter logs
+  - How to enable debug logging for integrations
+
+## [1.2.38] - 2026-01-14
+
+### Added
+- Pre-authorized read-only hass-mcp tools (no confirmation needed):
+  - `get_version`, `get_entity`, `list_entities`, `search_entities_tool`
+  - `domain_summary_tool`, `list_automations`, `get_history`, `get_error_log`
+- Pre-authorized file read operations:
+  - `Read`, `Glob`, `Grep` for `/homeassistant/**`, `/config/**`, `/share/**`, `/media/**`
+- Write operations still require confirmation: `entity_action`, `call_service_tool`, `restart_ha`
+
+## [1.2.37] - 2026-01-14
+
+### Added
+- Auto-generated `~/.claude/CLAUDE.md` with path mapping instructions
+- Claude Code now knows `/config` → `/homeassistant` translation
+
+## [1.2.36] - 2026-01-14
+
+### Fixed
+- Restored config reading for font size, theme, and session persistence
+- ttyd now applies terminal_font_size, terminal_theme, and session_persistence settings
+
+## [1.2.35] - 2026-01-14
+
+### Added
+- Symlink `/config` → `/homeassistant` for HA path compatibility (reverted in 1.2.36)
+
+## [1.2.34] - 2026-01-14
+
+### Added
+- Auto-update Claude Code option (`auto_update_claude`) - checks for updates on startup
+- Keeps Claude Code current without requiring add-on version bumps
+
+## [1.2.33] - 2026-01-14
+
+### Added
+- Brazilian Portuguese translation (pt-BR)
+- Spanish translation (es)
+
+## [1.2.32] - 2026-01-14
+
+### Fixed
+- Added .profile to source .bashrc (tmux login shells need this for aliases)
+
+## [1.2.31] - 2026-01-14
+
+### Fixed
+- Version bump to force rebuild (1.2.30 may have been cached before alias fix)
+
+## [1.2.30] - 2026-01-14
+
+### Changed
+- Reorganized documentation: DOCS.md renamed to README.md
+- Simplified root README.md
+- Added Quick Start and Requirements sections
+
+### Fixed
+- Added .bashrc with aliases (`c`, `cc`, `ha-config`, `ha-logs`) - they were documented but not working
+
+### Removed
+- Deleted unused run.sh (Dockerfile CMD has everything inline)
+
+## [1.2.29] - 2026-01-14
+
+### Fixed
+- hass-mcp expects `HA_URL` not `HA_HOST`
+
+## [1.2.28] - 2026-01-14
+
+### Changed
+- Export HA_TOKEN/HA_HOST as environment variables instead of baking into MCP config
+- hass-mcp now reads token from inherited environment (cleaner approach)
+
+## [1.2.27] - 2026-01-14
+
+### Fixed
+- hass-mcp expects `HA_TOKEN` and `HA_HOST` (not `HASS_TOKEN`/`HASS_HOST`)
+
+## [1.2.26] - 2026-01-14
+
+### Fixed
+- MCP now configured using `claude mcp add-json` command (proper Claude Code API)
+- Previous settings.json approach was not recognized by Claude Code
+
+### Documentation
+- Added detailed copy/paste instructions for tmux mode (Ctrl+Shift to select, Shift+Insert to paste)
+
+## [1.2.25] - 2026-01-14
+
+### Fixed
+- MCP configuration was never created - hass-mcp integration now works
+- Added MCP setup to Dockerfile CMD (run.sh was not being executed)
+- `/mcp` command now shows Home Assistant MCP server when `enable_mcp: true`
+
+## [1.2.24] - 2026-01-14
+
+### Added
+- Improved tmux mouse wheel scrolling support
+- Disable alternate screen buffer for better scrollback (`smcup@:rmcup@`)
+- Mouse wheel bindings for scrolling in tmux copy mode
+
+### Note
+- Mouse scrolling now enabled; use middle-click or Shift+Insert to paste
+
+## [1.2.23] - 2026-01-14
+
+### Added
+- Configure tmux with 20,000 line scrollback buffer (`history-limit`)
+- Use `Ctrl+b [` then arrow keys/Page Up/Down to scroll in tmux
+
+## [1.2.22] - 2026-01-14
+
+### Added
+- Increased terminal scrollback buffer to 20,000 lines (xterm.js)
+
+## [1.2.21] - 2026-01-14
+
+### Reverted
+- Removed tmux mouse mode (breaks paste functionality)
+
+### Documentation
+- Added section explaining scrolling and session persistence trade-offs
+
+## [1.2.20] - 2026-01-14
+
+### Fixed
+- Persist /root/.claude.json file (stores theme/onboarding state)
+- Enable tmux mouse support for scroll wheel (`set -g mouse on`)
+
+## [1.2.19] - 2026-01-14
+
+### Fixed
+- Store Claude Code data in /homeassistant/.claudecode (truly persistent)
+- Survives addon uninstall/reinstall/rebuild
+- Symlink ~/.claude and ~/.config/claude-code to HA config directory
+
+## [1.2.18] - 2026-01-14
+
+### Changed
+- Sidebar icon changed to mdi:brain
+
+### Fixed
+- Persist both ~/.claude and ~/.config/claude-code directories
+- Ensures all Claude Code auth and config survives restarts
+
+## [1.2.17] - 2026-01-14
+
+### Fixed
+- Persist Claude Code authentication across restarts
+- Symlink /root/.claude to /data/claude for persistent storage
+- Restored config reading for font size, theme, and session persistence
+
+## [1.2.16] - 2026-01-14
+
+### Fixed
+- Restored config reading for font size, theme, and session persistence
+- ttyd now applies terminal_font_size, terminal_theme, and session_persistence settings
+
+## [1.2.15] - 2026-01-14
+
+### Fixed
+- Refined AppArmor profile with focused permissions for HA config access
+- Added dac_read_search capability for directory listing
+- Full access to /homeassistant, /share, /media, /config directories
+- Read-only access to system files, SSL, backups
+
+## [1.2.14] - 2026-01-14
+
+### Fixed
+- Add /etc/** read permissions to AppArmor profile
+- Fixes "bash: /etc/profile: Permission denied" error
+
+## [1.2.13] - 2026-01-14
+
+### Fixed
+- Add PTY permissions to AppArmor profile (sys_tty_config, /dev/ptmx, /dev/pts/*)
+- Fixes "pty_spawn: Permission denied" error when spawning terminal
+
+## [1.2.12] - 2026-01-14
+
+### Fixed
+- Use static ttyd binary from GitHub releases instead of Alpine package
+- Fixes "failed to load evlib_uv" libwebsockets error
+
+## [1.2.11] - 2026-01-14
+
+### Changed
+- Simplified startup: run ttyd directly in CMD without script file
+- Minimal configuration for debugging startup issues
+
+## [1.2.10] - 2026-01-14
+
+### Fixed
+- Create run.sh inline via heredoc to avoid file permission issues
+
+## [1.2.9] - 2026-01-14
+
+### Fixed
+- Add .gitattributes to enforce LF line endings for shell scripts
+- Force Docker cache bust for permission fixes
+
+## [1.2.8] - 2026-01-14
+
+### Changed
+- Use Docker's tini init system (`init: true`) instead of s6-overlay
+- Simplified entrypoint configuration
+
+## [1.2.7] - 2026-01-14
+
+### Fixed
+- Use bash instead of bashio in s6-overlay run script
+- Add chmod +x /init to fix permission issues
+
+## [1.2.6] - 2026-01-14
+
+### Changed
+- Properly configure s6-overlay v3 service structure
+- Add service files in /etc/s6-overlay/s6-rc.d/ttyd
+
+## [1.2.5] - 2026-01-14
+
+### Changed
+- Attempted switch to pure Alpine base image (reverted due to HA format requirements)
+
+## [1.2.4] - 2026-01-14
+
+### Fixed
+- Set `init: false` for s6-overlay v3 compatibility
+
+## [1.2.3] - 2026-01-14
+
+### Fixed
+- Force bash entrypoint to bypass s6-overlay init issues
+
+## [1.2.2] - 2026-01-14
+
+### Fixed
+- Remove s6-overlay dependency, use plain bash with jq
+- Fixes "/init: Permission denied" startup error
+
+## [1.2.1] - 2026-01-14
+
+### Fixed
+- Corrected hass-mcp package name (was homeassistant-mcp)
+- Upgraded to Python 3.13 base image for hass-mcp compatibility
+
+## [1.2.0] - 2026-01-14
+
+### Changed
+- **Security improvement**: Removed API key from add-on config - Claude Code now handles authentication itself
+- Simplified Dockerfile - use Alpine's ttyd package instead of architecture-specific downloads
+- Removed model selection from config (Claude Code manages this)
+
+### Fixed
+- Docker build failure due to BUILD_ARCH variable not being passed correctly
+
+## [1.1.0] - 2026-01-14
+
+### Added
+- Model selection option (sonnet, opus, haiku)
+- Terminal font size configuration (10-24px)
+- Terminal theme selection (dark/light)
+- Session persistence using tmux
+- s6-overlay service definitions for better process management
+- Shell aliases and shortcuts (c, cc, ha-config, ha-logs)
+- Welcome banner with configuration info
+- Health check for container monitoring
+
+### Changed
+- Upgraded to Python 3.12 Alpine base image
+- Improved architecture-specific ttyd binary installation
+- Enhanced run.sh with better configuration handling
+- Better error messages and validation
+
+### Fixed
+- Proper ingress base path handling
+
+## [1.0.0] - 2026-01-14
+
+### Added
+- Initial release
+- Web terminal interface using ttyd
+- Claude Code integration via npm package
+- Home Assistant MCP server integration for entity/service access
+- Read-write access to Home Assistant configuration
+- Multi-architecture support (amd64, aarch64, armv7, armhf, i386)
+- Ingress support for seamless sidebar integration

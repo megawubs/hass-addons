@@ -1,0 +1,73 @@
+name: Claude Code
+description: Run Claude Code AI assistant inside Home Assistant to create automations, debug issues, and manage your smart home configuration
+version: "1.3.1"
+slug: claudecode
+url: https://github.com/megawubs/hass-addons
+arch:
+  - amd64
+  - aarch64
+stdin: true
+ingress: true
+ingress_port: 7681
+ingress_stream: true
+panel_icon: mdi:brain
+panel_title: Claude Code
+homeassistant_api: true
+auth_api: true
+hassio_api: true
+hassio_role: manager
+docker_api: true
+full_access: true
+map:
+  - homeassistant_config:rw
+  - ssl:ro
+  - share:rw
+  - media:rw
+  - addon_config:rw
+  - backup:ro
+# uv cache and the config test-suite's environment: ~1 GB, rebuilt from uv.lock on demand.
+backup_exclude:
+  - uv
+  - uv/*
+options:
+  default_task_model: ""
+  default_task_allowed_tools: []
+  task_max_runtime_minutes: 30
+  enable_mcp: true
+  enable_playwright_mcp: false
+  playwright_cdp_host: ""
+  terminal_font_size: 14
+  terminal_theme: dark
+  working_directory: /homeassistant
+  session_persistence: true
+  auto_update_claude: true
+  auto_launch_claude: "off"
+  enable_remote_control: false
+  remote_control_session_prefix: HomeAssistant
+  extra_npm_packages: []
+  remote_control_server: false
+  remote_control_permission_mode: default
+  prepare_config_tests: true
+schema:
+  default_task_model: str?
+  default_task_allowed_tools:
+    - str
+  task_max_runtime_minutes: int(1,240)
+  enable_mcp: bool
+  enable_playwright_mcp: bool
+  playwright_cdp_host: str?
+  terminal_font_size: int(10,24)
+  terminal_theme: list(dark|light)
+  working_directory: str
+  session_persistence: bool
+  auto_update_claude: bool
+  auto_launch_claude: list(off|new|continue)
+  enable_remote_control: bool
+  remote_control_session_prefix: str
+  extra_npm_packages:
+    - str?
+  remote_control_server: bool
+  remote_control_permission_mode: list(default|acceptEdits|auto|plan|dontAsk)
+  prepare_config_tests: bool
+environment:
+  TERM: xterm-256color

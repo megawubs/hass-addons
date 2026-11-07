@@ -1,2 +1,4 @@
 .idea/
 .omc/
+__pycache__/
+*.pyc
