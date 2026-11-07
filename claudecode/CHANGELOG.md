@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2026-11-07
+
+### Fixed
+- `uv sync` failed at start-up with `Permission denied: '/lib/ld-musl-x86_64.so.1'`: uv asks
+  Python for the musl version, which runs the musl loader, and AppArmor only allowed reading
+  `/lib`. The loader may now be executed. Tested in `tests/test_apparmor.py`
+
 ## [1.3.1] - 2026-11-07
 
 ### Added

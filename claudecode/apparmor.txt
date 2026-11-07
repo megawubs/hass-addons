@@ -36,6 +36,8 @@ profile claudecode flags=(attach_disconnected,mediate_deleted) {
   /bin/** ixr,
   /usr/bin/** ixr,
   /usr/lib/** ixmr,
+  # The musl loader: uv runs it to read the musl version before every sync.
+  /lib/ld-musl-*.so.1 ixmr,
   /usr/local/** ixr,
   # npm's global prefix. Only these two subtrees are writable, so `npm -g` can
   # install and update Claude Code; without w it fails with EACCES on rename
