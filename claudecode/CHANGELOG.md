@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-11-07
+
+### Added
+- `esphome` command: runs the ESPHome CLI inside the ESPHome Device Builder add-on with
+  `docker exec`, so `esphome config|compile|upload|logs <file>.yaml` works from the terminal
+  and from Claude Code without shipping a second toolchain. Finds the container itself
+  (`app_<id>_esphome`, the stable add-on over beta/dev; `ESPHOME_CONTAINER` overrides),
+  maps paths under `/homeassistant` to `/config` and runs in the matching directory so
+  relative `!include`s work. Without Docker access it says to turn protection mode off.
+  Tested in `tests/test_esphome_wrapper.py`
+- AppArmor: read/write on the Docker socket, so `docker exec` works once protection mode is off
+
 ## [1.3.0] - 2026-11-06
 
 ### Added

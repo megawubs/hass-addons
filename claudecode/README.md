@@ -250,7 +250,31 @@ Add `.venv` to your config's `.gitignore`. Don't create the environment with `py
 inside `/homeassistant`: AppArmor blocks loading compiled modules from there, and the add-on
 replaces such a virtualenv with the symlink at the next start.
 
-## File Locations
+## ESPHome
+
+The add-on has an `esphome` command that runs ESPHome inside the
+[ESPHome Device Builder](https://esphome.io/guides/getting_started_hassio/) add-on instead
+of shipping a second toolchain (several GB, glibc-only) here:
+
+```bash
+cd /homeassistant/esphome
+esphome config m5dial-woonkamer.yaml
+esphome compile wall-pad/wall-pad.yaml
+esphome upload wall-pad/wall-pad.yaml --device 192.168.1.50
+esphome logs wall-pad/wall-pad.yaml --device 192.168.1.50
+```
+
+- It uses the ESPHome add-on's own version and build cache, so a build matches what the
+  dashboard would produce, and an incremental build stays incremental.
+- Paths under `/homeassistant` are passed on as `/config/...` (where the ESPHome add-on sees the
+  config), and the command runs in the matching directory, so relative paths keep working.
+- The container is found automatically (`app_<id>_esphome`; the stable add-on wins over a beta
+  or dev one). Set `ESPHOME_CONTAINER=<name>` to pick another.
+- **Requirement:** it uses `docker exec`, which needs the Docker socket. Turn **Protection mode**
+  off on this add-on's Info tab and restart it. That gives the add-on control over every
+  container on the host - it already runs as root with full access, but make this choice
+  deliberately. With protection mode on, `esphome` says so and does nothing.
+
 
 | Path | Description | Access |
 |------|-------------|--------|

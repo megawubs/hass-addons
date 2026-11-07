@@ -129,6 +129,12 @@ ENV UV_CACHE_DIR=/data/uv/cache \
 COPY rootfs/usr/local/bin/prepare-config-tests /usr/local/bin/prepare-config-tests
 RUN chmod +x /usr/local/bin/prepare-config-tests
 
+# `esphome` runs the ESPHome CLI inside the ESPHome Device Builder add-on with
+# `docker exec` (its toolchains are GBs, glibc-only, and already installed there
+# with their build cache). Needs protection mode off for the Docker socket.
+COPY rootfs/usr/local/bin/esphome /usr/local/bin/esphome
+RUN chmod +x /usr/local/bin/esphome
+
 # Install mbpoll (Modbus command line tool) from source
 RUN apk add --no-cache --virtual .build-deps \
     build-base \

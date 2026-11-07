@@ -31,6 +31,15 @@ cannot load from `/homeassistant` (AppArmor), so do not create a virtualenv ther
 submodules are missing: `git submodule update --init`. The add-on runs both at start-up
 in the background (`[config-tests]` lines in the add-on log).
 
+## ESPHome
+
+`esphome` here is a wrapper: it runs the real CLI inside the ESPHome Device Builder add-on
+(`docker exec`), which has the toolchains, the build cache and the dashboard's ESPHome version.
+Use it as usual: `esphome config|compile|upload|logs <file>.yaml [--device <ip>]`. Paths under
+`/homeassistant` are mapped to `/config` for you. Do not install ESPHome or PlatformIO in this
+add-on. If it reports no Docker access, protection mode is on: tell the user, don't work around it.
+Compiles take minutes (the wall-pad ~13 min); run them in the background with a long timeout.
+
 ## Reading Home Assistant Logs
 
 **Log levels (from most to least verbose):**

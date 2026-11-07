@@ -44,6 +44,11 @@ profile claudecode flags=(attach_disconnected,mediate_deleted) {
   /usr/local/lib/node_modules/** rwixk,
   /usr/libexec/** ixr,
 
+  # Docker socket (mounted only with protection mode off): `esphome` and other
+  # `docker exec` calls into sibling add-ons connect to it.
+  /run/docker.sock rw,
+  /var/run/docker.sock rw,
+
   # Add-on data
   /data/** rwk,
   # uv cache and the config test-suite's environment (prepare-config-tests):
